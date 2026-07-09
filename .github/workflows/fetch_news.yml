@@ -1,0 +1,50 @@
+name: Fetch & Analyze News
+
+on:
+  schedule:
+    - cron: '0 * * * *'    # Every hour at :00 UTC
+  workflow_dispatch:         # Manual trigger from GitHub Actions tab
+
+jobs:
+  run-pipeline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('backend/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: pip install -r backend/requirements.txt
+
+      - name: Cache SentenceTransformer model
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: ${{ runner.os }}-st-all-MiniLM-L6-v2
+
+      - name: Download SentenceTransformer model
+        run: python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2')"
+
+      - name: Run news pipeline
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          DATABASE_URL:  ${{ secrets.DATABASE_URL }}
+        run: python -m backend.pipeline.run
+
+      - name: Report pipeline results
+        if: always()
+        run: echo "Pipeline job finished with status ${{ job.status }}"

@@ -1,0 +1,2 @@
+# Alembic migrations will be initialised here in Phase 4
+# Run: alembic init backend/db/migrations

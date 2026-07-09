@@ -1,0 +1,49 @@
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+*.log
+
+# Virtual environment
+venv/
+.venv/
+env/
+
+# Environment files (never commit real secrets)
+.env
+backend/.env
+frontend/.env.local
+
+# ── Testing ───────────────────────────────────────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/
+
+# ── Node / Frontend ───────────────────────────────────────────────────────────
+node_modules/
+frontend/dist/
+frontend/.env.local
+
+# ── ML model cache ────────────────────────────────────────────────────────────
+# SentenceTransformer downloads models here locally
+.cache/
+~/.cache/huggingface/
+
+# ── IDE / OS ──────────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# ── Alembic ───────────────────────────────────────────────────────────────────
+# Keep migration files but exclude the auto-generated env.py backup
+backend/db/migrations/__pycache__/

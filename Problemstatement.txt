@@ -1,0 +1,286 @@
+Problem Statement
+Project Title
+AI-Powered Indian Stock Market News Intelligence Platform
+Background
+Indian stock market traders and researchers rely on multiple financial news platforms such as Moneycontrol, Economic Times, LiveMint, Business Standard, and Reuters India to stay informed about market-moving events.
+However, important news is scattered across different sources, many articles report the same event, and traders spend significant time reading repetitive articles before understanding how the news may impact different sectors of the Indian stock market.
+For active traders, speed is critical. Delays in identifying relevant market news can lead to missed trading opportunities or delayed decision-making.
+There is a need for a centralized platform that continuously monitors trusted Indian financial news sources, removes duplicate stories, and uses Artificial Intelligence to summarize the news and explain its potential impact on the Indian stock market.
+Objective
+Design and build an AI-powered news intelligence platform that automatically collects financial news from multiple trusted Indian news sources, analyzes each news article using a Large Language Model (LLM), and presents concise, actionable insights for traders and market researchers.
+The platform should help users understand:
+What happened?
+Which sector is likely to be affected?
+Whether the news is positive or negative from an Indian stock market perspective.
+Why that sector may be impacted.
+The platform is not intended to predict stock prices or provide investment advice. Its purpose is to organize and explain market-relevant news in a structured and time-efficient manner.
+News Sources
+The application should aggregate news from multiple trusted Indian financial news sources.
+Examples include:
+Moneycontrol
+Economic Times Markets
+LiveMint
+Business Standard
+Reuters India (where available)
+The system should focus only on news relevant to the Indian stock market.
+The following categories should be excluded:
+Cryptocurrency
+Entertainment
+Celebrity News
+Sports
+General lifestyle content
+Any article that has no meaningful impact on listed Indian companies or market sectors
+(Need to discuss this)
+System Workflow
+1. News Collection
+The application should automatically fetch the latest financial news every one hour using multiple RSS feeds.
+2. Duplicate Detection
+Since multiple publishers often report the same event, the platform should identify duplicate stories and merge them into a single news item.
+Instead of displaying five nearly identical articles, users should see one consolidated news item with multiple source references.
+3. AI Analysis
+Each unique news article should be analyzed using an LLM.
+The model should generate:
+Short summary (2–3 lines)
+Market sentiment
+Positive
+Negative
+Neutral
+Primary affected sector
+Secondary affected sector (if applicable)
+Reasoning explaining why the sector may be affected
+Important
+Sentiment must be evaluated from the perspective of the Indian stock market, not from emotional sentiment.
+Example:
+RBI repo rate cut → Positive for Banking, Auto and Real Estate
+Increase in crude oil prices → Negative for Aviation and Paint companies
+The system should focus on explaining sector-level impact rather than predicting individual stock movements.
+4. Data Storage
+The platform should store:
+Original news article metadata
+AI-generated analysis
+Source information
+Timestamp
+Historical data should be preserved to allow users to browse previous news.
+( need to discuss this)
+5. Dashboard
+The frontend should present news in a clean dashboard.
+Each news card should display:
+Headline
+AI-generated summary
+Positive / Negative badge
+Primary affected sector
+Secondary affected sector (if available)
+AI reasoning
+Published time
+News source(s)
+Original article link
+Filters
+Users should be able to filter news by:
+Positive
+Negative
+Date
+Historical news should remain accessible through archive support.
+Refresh Frequency
+The system should automatically refresh every one hour.
+Workflow:
+Scheduler
+
+↓
+
+Fetch RSS Feeds
+
+↓
+
+Remove Duplicates
+
+↓
+
+Analyze only NEW articles
+
+↓
+
+Store Results
+
+↓
+
+Update Dashboard
+Functional Requirements
+The application should:
+Fetch news automatically every hour
+Aggregate multiple RSS feeds
+Remove duplicate news articles
+Analyze news using an LLM
+Generate concise AI summaries
+Identify affected market sectors
+Classify news as Positive or Negative from a market perspective
+Store historical news
+Display structured results through a dashboard
+Non-Functional Requirements
+The platform should:
+Avoid duplicate news
+Minimize unnecessary LLM calls
+Store AI-generated analysis for future viewing
+Support future addition of premium news APIs
+Be modular and scalable
+Out of Scope (MVP)
+The first version will not include:
+Stock price prediction
+Buy/Sell recommendations
+Company-level stock recommendations
+Real-time alerts
+Push notifications
+Portfolio tracking
+Watchlists
+Cryptocurrency news
+Global market analysis (unless directly impacting Indian markets)
+Expected Outcome
+Within two minutes of opening the dashboard, a trader should be able to understand:
+What important market news occurred recently.
+Which sectors are likely to be affected.
+Whether the impact is positive or negative from a market perspective.
+Why those sectors may be affected.
+Which original news sources reported the event.
+
+Problem Statement
+Project Title
+AI-Powered Indian Stock Market News Intelligence Platform
+Background
+Indian stock market traders and researchers rely on multiple financial news platforms such as Moneycontrol, Economic Times, LiveMint, Business Standard, and Reuters India to stay informed about market-moving events.
+However, important news is scattered across different sources, many articles report the same event, and traders spend significant time reading repetitive articles before understanding how the news may impact different sectors of the Indian stock market.
+For active traders, speed is critical. Delays in identifying relevant market news can lead to missed trading opportunities or delayed decision-making.
+There is a need for a centralized platform that continuously monitors trusted Indian financial news sources, removes duplicate stories, and uses Artificial Intelligence to summarize the news and explain its potential impact on the Indian stock market.
+Objective
+Design and build an AI-powered news intelligence platform that automatically collects financial news from multiple trusted Indian news sources, analyzes each news article using a Large Language Model (LLM), and presents concise, actionable insights for traders and market researchers.
+The platform should help users understand:
+What happened?
+Which sector is likely to be affected?
+Whether the news is positive or negative from an Indian stock market perspective.
+Why that sector may be impacted.
+The platform is not intended to predict stock prices or provide investment advice. Its purpose is to organize and explain market-relevant news in a structured and time-efficient manner.
+News Sources
+The application should aggregate news from multiple trusted Indian financial news sources.
+Examples include:
+Moneycontrol
+Economic Times Markets
+LiveMint
+Business Standard
+Reuters India (where available)
+The system should focus only on news relevant to the Indian stock market.
+The following categories should be excluded:
+Cryptocurrency
+Entertainment
+Celebrity News
+Sports
+General lifestyle content
+Any article that has no meaningful impact on listed Indian companies or market sectors
+(Need to discuss this)
+System Workflow
+1. News Collection
+The application should automatically fetch the latest financial news every one hour using multiple RSS feeds.
+2. Duplicate Detection
+Since multiple publishers often report the same event, the platform should identify duplicate stories and merge them into a single news item.
+Instead of displaying five nearly identical articles, users should see one consolidated news item with multiple source references.
+3. AI Analysis
+Each unique news article should be analyzed using an LLM.
+The model should generate:
+Short summary (2–3 lines)
+Market sentiment
+Positive
+Negative
+Neutral
+Primary affected sector
+Secondary affected sector (if applicable)
+Reasoning explaining why the sector may be affected
+Important
+Sentiment must be evaluated from the perspective of the Indian stock market, not from emotional sentiment.
+Example:
+RBI repo rate cut → Positive for Banking, Auto and Real Estate
+Increase in crude oil prices → Negative for Aviation and Paint companies
+The system should focus on explaining sector-level impact rather than predicting individual stock movements.
+4. Data Storage
+The platform should store:
+Original news article metadata
+AI-generated analysis
+Source information
+Timestamp
+Historical data should be preserved to allow users to browse previous news.
+( need to discuss this)
+5. Dashboard
+The frontend should present news in a clean dashboard.
+Each news card should display:
+Headline
+AI-generated summary
+Positive / Negative badge
+Primary affected sector
+Secondary affected sector (if available)
+AI reasoning
+Published time
+News source(s)
+Original article link
+Filters
+Users should be able to filter news by:
+Positive
+Negative
+Date
+Historical news should remain accessible through archive support.
+Refresh Frequency
+The system should automatically refresh every one hour.
+Workflow:
+Scheduler
+
+↓
+
+Fetch RSS Feeds
+
+↓
+
+Remove Duplicates
+
+↓
+
+Analyze only NEW articles
+
+↓
+
+Store Results
+
+↓
+
+Update Dashboard
+Functional Requirements
+The application should:
+Fetch news automatically every hour
+Aggregate multiple RSS feeds
+Remove duplicate news articles
+Analyze news using an LLM
+Generate concise AI summaries
+Identify affected market sectors
+Classify news as Positive or Negative from a market perspective
+Store historical news
+Display structured results through a dashboard
+Non-Functional Requirements
+The platform should:
+Avoid duplicate news
+Minimize unnecessary LLM calls
+Store AI-generated analysis for future viewing
+Support future addition of premium news APIs
+Be modular and scalable
+Out of Scope (MVP)
+The first version will not include:
+Stock price prediction
+Buy/Sell recommendations
+Company-level stock recommendations
+Real-time alerts
+Push notifications
+Portfolio tracking
+Watchlists
+Cryptocurrency news
+Global market analysis (unless directly impacting Indian markets)
+Expected Outcome
+Within two minutes of opening the dashboard, a trader should be able to understand:
+What important market news occurred recently.
+Which sectors are likely to be affected.
+Whether the impact is positive or negative from a market perspective.
+Why those sectors may be affected.
+Which original news sources reported the event.
+
