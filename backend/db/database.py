@@ -77,6 +77,14 @@ def url_exists(db: Session, url: str) -> bool:
     return db.query(Source.id).filter(Source.url == url).first() is not None
 
 
+def get_existing_urls(db: Session) -> set[str]:
+    """Return a set of all previously saved URLs to skip fetching them again."""
+    from backend.db.models import Source
+    # Query only the url column
+    urls = db.query(Source.url).all()
+    return {u[0] for u in urls}
+
+
 def save_article(db: Session, article_data: dict) -> None:
     """Atomically persist an article together with its sources.
     Uses the canonical title from the article_data.

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>News Intelligence Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=Outfit:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-fixed-dim": "#a7c8ff",
+                        "secondary": "#ffb4ab",
+                        "on-tertiary-fixed": "#001b3b",
+                        "error": "#ffb4ab",
+                        "secondary-container": "#d30017",
+                        "surface-container-low": "#1a1c20",
+                        "outline-variant": "#3b4b3e",
+                        "on-secondary-container": "#ffe2de",
+                        "tertiary-fixed": "#d5e3ff",
+                        "on-tertiary": "#003060",
+                        "secondary-fixed-dim": "#ffb4ab",
+                        "on-primary-fixed-variant": "#00522c",
+                        "on-surface-variant": "#b9cbbb",
+                        "on-surface": "#e2e2e8",
+                        "on-primary-container": "#00713f",
+                        "on-tertiary-container": "#0062b9",
+                        "background": "#111318",
+                        "on-secondary-fixed-variant": "#93000c",
+                        "outline": "#849586",
+                        "primary-fixed-dim": "#00e383",
+                        "tertiary-container": "#d0e0ff",
+                        "surface-dim": "#111318",
+                        "surface-container-high": "#282a2e",
+                        "on-error": "#690005",
+                        "inverse-on-surface": "#2f3035",
+                        "primary": "#f2fff1",
+                        "error-container": "#93000a",
+                        "surface-tint": "#00e383",
+                        "secondary-fixed": "#ffdad6",
+                        "surface-container-lowest": "#0c0e12",
+                        "inverse-surface": "#e2e2e8",
+                        "on-background": "#e2e2e8",
+                        "inverse-primary": "#006d3c",
+                        "surface-variant": "#333539",
+                        "primary-container": "#00ff94",
+                        "surface-container": "#1e2024",
+                        "tertiary": "#fcfbff",
+                        "on-error-container": "#ffdad6",
+                        "on-secondary-fixed": "#410002",
+                        "on-secondary": "#690006",
+                        "surface": "#111318",
+                        "primary-fixed": "#5bffa1",
+                        "on-primary": "#00391d",
+                        "on-tertiary-fixed-variant": "#004788",
+                        "surface-container-highest": "#333539",
+                        "on-primary-fixed": "#00210e",
+                        "surface-bright": "#37393e"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "16px",
+                        "margin-mobile": "16px",
+                        "container-max": "1440px",
+                        "margin-desktop": "48px",
+                        "unit": "4px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Outfit"],
+                        "stat-lg": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "display-lg": ["Outfit"],
+                        "body-md": ["Inter"],
+                        "display-lg-mobile": ["Outfit"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "stat-lg": ["20px", { "lineHeight": "24px", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.1em", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "display-lg-mobile": ["32px", { "lineHeight": "40px", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #0A0C10; /* Base Layer */
+            color: #e2e2e8;
+        }
+        
+        .glass-panel {
+            background: rgba(26, 28, 32, 0.4);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .glass-card {
+            background: linear-gradient(135deg, rgba(30, 32, 36, 0.6) 0%, rgba(30, 32, 36, 0.2) 100%);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-left: 1px solid rgba(255, 255, 255, 0.05);
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+            box-shadow: inset 1px 1px 0px rgba(255, 255, 255, 0.05);
+        }
+        
+        .glass-card:active {
+           box-shadow: 0 0 15px rgba(49, 145, 255, 0.15), inset 1px 1px 0px rgba(255, 255, 255, 0.05);
+        }
+
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        
+        .badge-positive {
+            background-color: rgba(0, 227, 131, 0.1);
+            color: #00e383;
+            box-shadow: 0 0 10px rgba(0, 227, 131, 0.2);
+        }
+        
+        .badge-negative {
+            background-color: rgba(255, 180, 171, 0.1);
+            color: #ffb4ab;
+            box-shadow: 0 0 10px rgba(255, 180, 171, 0.2);
+        }
+        
+        .glow-active {
+            box-shadow: 0 0 15px rgba(0, 255, 148, 0.2);
+            border-color: rgba(0, 255, 148, 0.4);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="antialiased min-h-screen flex flex-col pt-[88px] pb-24 font-body-md text-body-md overflow-x-hidden">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-surface/60 dark:bg-surface-container/60 backdrop-blur-xl border-b border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.1)]">
+<div class="flex justify-between items-center px-gutter py-4 w-full max-w-container-max mx-auto">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed-dim" style="font-variation-settings: 'FILL' 1;">analytics</span>
+<div class="flex flex-col">
+<span class="font-headline-md text-headline-md font-bold tracking-tighter text-primary dark:text-primary-fixed-dim">News Intelligence</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Last Updated: 2m ago</span>
+</div>
+</div>
+<button class="font-label-sm text-label-sm text-primary dark:text-primary-fixed-dim px-3 py-1 rounded-full bg-primary/10 hover:bg-white/5 transition-colors scale-95 active:duration-100 border border-primary/20">LIVE</button>
+</div>
+</header>
+<main class="flex-1 w-full max-w-container-max mx-auto px-margin-mobile flex flex-col gap-6">
+<!-- Controls/Filters Bar -->
+<section class="-mx-margin-mobile px-margin-mobile overflow-x-auto hide-scrollbar">
+<div class="flex gap-3 pb-2 pt-2 w-max">
+<button class="font-label-sm text-label-sm px-5 py-2 rounded-full glass-panel text-primary-container border-primary-container/30 glow-active transition-all active:scale-95">All</button>
+<button class="font-label-sm text-label-sm px-5 py-2 rounded-full glass-panel text-on-surface hover:text-primary-fixed-dim hover:bg-white/5 transition-all active:scale-95">Positive</button>
+<button class="font-label-sm text-label-sm px-5 py-2 rounded-full glass-panel text-on-surface hover:text-primary-fixed-dim hover:bg-white/5 transition-all active:scale-95">Negative</button>
+<button class="font-label-sm text-label-sm px-5 py-2 rounded-full glass-panel text-on-surface hover:text-primary-fixed-dim hover:bg-white/5 transition-all active:scale-95">Tech</button>
+<button class="font-label-sm text-label-sm px-5 py-2 rounded-full glass-panel text-on-surface hover:text-primary-fixed-dim hover:bg-white/5 transition-all active:scale-95">Banking</button>
+<button class="font-label-sm text-label-sm px-5 py-2 rounded-full glass-panel text-on-surface hover:text-primary-fixed-dim hover:bg-white/5 transition-all active:scale-95">Auto</button>
+</div>
+</section>
+<!-- Main News Feed -->
+<section class="flex flex-col gap-4 pb-6">
+<!-- News Card 1 -->
+<article class="glass-card rounded-xl p-4 flex flex-col gap-3 transition-all duration-200">
+<div class="flex justify-between items-start gap-4">
+<h3 class="font-headline-md text-headline-md text-on-surface font-bold leading-tight flex-1">HDFC Bank Shares Surge on Strong Q3 Earnings</h3>
+<div class="badge-positive font-label-sm text-label-sm px-2 py-1 rounded-full flex items-center gap-1 flex-shrink-0 animate-pulse">
+<span class="material-symbols-outlined text-[14px]">trending_up</span>
+                        92%
+                    </div>
+</div>
+<p class="text-on-surface-variant font-body-md text-body-md line-clamp-2">India's largest private sector lender reported a 33% year-on-year jump in net profit, driven by robust loan growth and stable asset quality.</p>
+<div class="flex justify-between items-end mt-1 pt-3 border-t border-white/5">
+<div class="flex gap-2">
+<span class="text-[10px] uppercase tracking-wider font-semibold text-tertiary-fixed-dim bg-white/5 px-2 py-1 rounded-md">Banking</span>
+<span class="text-[10px] uppercase tracking-wider font-semibold text-tertiary-fixed-dim bg-white/5 px-2 py-1 rounded-md">Finance</span>
+</div>
+<div class="flex items-center gap-2 font-label-sm text-label-sm text-on-surface-variant/60">
+<span>15m ago</span>
+<span>•</span>
+<span class="text-on-surface-variant">Moneycontrol</span>
+</div>
+</div>
+</article>
+<!-- News Card 2 -->
+<article class="glass-card rounded-xl p-4 flex flex-col gap-3 transition-all duration-200">
+<div class="flex justify-between items-start gap-4">
+<h3 class="font-headline-md text-headline-md text-on-surface font-bold leading-tight flex-1">Global Tech Selloff Continues Amid Rate Hike Fears</h3>
+<div class="badge-negative font-label-sm text-label-sm px-2 py-1 rounded-full flex items-center gap-1 flex-shrink-0">
+<span class="material-symbols-outlined text-[14px]">trending_down</span>
+                        85%
+                    </div>
+</div>
+<p class="text-on-surface-variant font-body-md text-body-md line-clamp-2">Major technology stocks faced heavy selling pressure in early trading as investors reacted to hotter-than-expected inflation data.</p>
+<div class="flex justify-between items-end mt-1 pt-3 border-t border-white/5">
+<div class="flex gap-2">
+<span class="text-[10px] uppercase tracking-wider font-semibold text-tertiary-fixed-dim bg-white/5 px-2 py-1 rounded-md">Tech</span>
+<span class="text-[10px] uppercase tracking-wider font-semibold text-tertiary-fixed-dim bg-white/5 px-2 py-1 rounded-md">Markets</span>
+</div>
+<div class="flex items-center gap-2 font-label-sm text-label-sm text-on-surface-variant/60">
+<span>42m ago</span>
+<span>•</span>
+<span class="text-on-surface-variant">Bloomberg</span>
+</div>
+</div>
+</article>
+<!-- News Card 3 -->
+<article class="glass-card rounded-xl p-4 flex flex-col gap-3 transition-all duration-200 relative overflow-hidden">
+<div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full blur-3xl -z-10"></div>
+<div class="flex justify-between items-start gap-4">
+<h3 class="font-headline-md text-headline-md text-on-surface font-bold leading-tight flex-1">EV Startup Motors Secures $500M in Series C Funding</h3>
+<div class="badge-positive font-label-sm text-label-sm px-2 py-1 rounded-full flex items-center gap-1 flex-shrink-0">
+<span class="material-symbols-outlined text-[14px]">trending_up</span>
+                        78%
+                    </div>
+</div>
+<p class="text-on-surface-variant font-body-md text-body-md line-clamp-2">The latest funding round values the autonomous vehicle company at over $4 billion, paving the way for international expansion.</p>
+<div class="flex justify-between items-end mt-1 pt-3 border-t border-white/5">
+<div class="flex gap-2">
+<span class="text-[10px] uppercase tracking-wider font-semibold text-tertiary-fixed-dim bg-white/5 px-2 py-1 rounded-md">Auto</span>
+<span class="text-[10px] uppercase tracking-wider font-semibold text-tertiary-fixed-dim bg-white/5 px-2 py-1 rounded-md">Venture</span>
+</div>
+<div class="flex items-center gap-2 font-label-sm text-label-sm text-on-surface-variant/60">
+<span>1h ago</span>
+<span>•</span>
+<span class="text-on-surface-variant">Reuters</span>
+</div>
+</div>
+</article>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="md:hidden fixed bottom-0 w-full z-50 rounded-t-lg bg-surface/80 dark:bg-surface-container-lowest/80 backdrop-blur-lg border-t border-white/10 shadow-[0_-8px_30px_rgba(0,0,0,0.3)]">
+<div class="flex justify-around items-center h-16 w-full px-4 pb-safe">
+<button class="flex flex-col items-center text-primary dark:text-primary-fixed-dim font-bold hover:text-primary transition-all active:scale-90">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 1;">newspaper</span>
+<span class="font-label-sm text-label-sm">News</span>
+</button>
+<button class="flex flex-col items-center text-on-surface-variant/60 hover:text-primary transition-all active:scale-90">
+<span class="material-symbols-outlined mb-1">show_chart</span>
+<span class="font-label-sm text-label-sm">Markets</span>
+</button>
+<button class="flex flex-col items-center text-on-surface-variant/60 hover:text-primary transition-all active:scale-90">
+<span class="material-symbols-outlined mb-1">account_balance_wallet</span>
+<span class="font-label-sm text-label-sm">Portfolio</span>
+</button>
+<button class="flex flex-col items-center text-on-surface-variant/60 hover:text-primary transition-all active:scale-90">
+<span class="material-symbols-outlined mb-1">notifications_active</span>
+<span class="font-label-sm text-label-sm">Alerts</span>
+</button>
+</div>
+</nav>
+</body></html>

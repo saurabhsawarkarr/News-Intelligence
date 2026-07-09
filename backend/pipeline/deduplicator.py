@@ -44,8 +44,10 @@ def deduplicate(
     for article in articles:
         if "sources" not in article:
             article["sources"] = [{
-                "name": article["source_name"],
-                "url": article["url"]
+                "source_name": article["source_name"],
+                "url": article["url"],
+                "description": article.get("description", ""),
+                "published_at": article.get("published_at")
             }]
 
     for article in articles:

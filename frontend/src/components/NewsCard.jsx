@@ -1,101 +1,127 @@
 import React from 'react';
 import { formatDistanceToNow, parseISO } from 'date-fns';
-import SentimentBadge from './SentimentBadge';
-import SectorTag from './SectorTag';
-import SourceList from './SourceList';
-import { Clock } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 
-const NewsCard = ({ article }) => {
-  const {
-    title,
-    summary,
-    reasoning,
-    sentiment,
-    primary_sector,
-    secondary_sector,
-    published_at,
-    sources
-  } = article;
+// Deterministic pseudo-random number generator based on string
+const getPseudoRandom = (str, min, max) => {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const random = Math.abs(Math.sin(hash)) * 10000;
+  return Math.floor((random - Math.floor(random)) * (max - min + 1)) + min;
+};
 
-  const timeAgo = published_at 
-    ? formatDistanceToNow(parseISO(published_at), { addSuffix: true })
-    : '';
+const NewsCard = ({ article, onClick }) => {
+  const { title, summary, published_at, sources, sentiment, primary_sector, secondary_sector, id } = article;
+  
+  const timeAgo = formatDistanceToNow(parseISO(published_at), { addSuffix: true }).replace('about ', '');
+  const sourceName = sources && sources.length > 0 ? sources[0].name : 'Unknown';
+  
+  // Generate dummy percentages for the vibe design
+  let percentage = 0;
+  let isPositive = false;
+  let isNegative = false;
+  
+  if (sentiment === 'Positive') {
+    percentage = getPseudoRandom(id, 75, 98);
+    isPositive = true;
+  } else if (sentiment === 'Negative') {
+    percentage = getPseudoRandom(id, 65, 95);
+    isNegative = true;
+  } else {
+    percentage = getPseudoRandom(id, 5, 25);
+  }
+
+  // Tags
+  const tags = [];
+  if (primary_sector) tags.push(primary_sector.toUpperCase());
+  if (secondary_sector) tags.push(secondary_sector.toUpperCase());
 
   return (
-    <article 
-      className="glass-panel animate-fade-in"
+    <div 
+      onClick={() => onClick(article)}
       style={{
-        padding: '24px',
-        marginBottom: '20px',
-        transition: 'var(--transition)',
-        position: 'relative',
-        overflow: 'hidden'
+        backgroundColor: 'rgba(255, 255, 255, 0.03)',
+        border: '1px solid var(--border-color)',
+        borderRadius: '24px',
+        padding: '20px',
+        cursor: 'pointer',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '12px',
+        transition: 'transform 0.2s',
       }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.transform = 'translateY(-2px)';
-        e.currentTarget.style.boxShadow = 'var(--shadow-lg)';
-        e.currentTarget.style.backgroundColor = 'var(--bg-card-hover)';
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.transform = 'translateY(0)';
-        e.currentTarget.style.boxShadow = 'none';
-        e.currentTarget.style.backgroundColor = 'var(--bg-card)';
-      }}
+      onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(0.98)'}
+      onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
     >
-      {/* Top Meta Row */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
-          <SentimentBadge sentiment={sentiment} />
-          {primary_sector && <SectorTag sector={primary_sector} />}
-          {secondary_sector && <SectorTag sector={secondary_sector} />}
-        </div>
+      
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px' }}>
+        <h2 style={{ 
+          fontSize: '18px', 
+          lineHeight: '1.3', 
+          margin: 0,
+          color: 'var(--text-primary)',
+          flex: 1
+        }}>
+          {title}
+        </h2>
         
-        <div style={{ display: 'flex', alignItems: 'center', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-          <Clock size={14} style={{ marginRight: '4px' }} />
-          {timeAgo}
+        {/* Sentiment Badge */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '4px',
+          padding: '4px 10px',
+          borderRadius: '12px',
+          backgroundColor: isPositive ? 'var(--color-positive-bg)' : isNegative ? 'var(--color-negative-bg)' : 'var(--color-neutral-bg)',
+          color: isPositive ? 'var(--color-positive)' : isNegative ? '#ff6b6b' : 'var(--color-neutral)',
+          border: `1px solid ${isPositive ? 'rgba(0,255,136,0.1)' : isNegative ? 'rgba(255,68,68,0.1)' : 'rgba(255,255,255,0.05)'}`,
+          flexShrink: 0
+        }}>
+          {isPositive ? <TrendingUp size={12} strokeWidth={3} /> : isNegative ? <TrendingDown size={12} strokeWidth={3} /> : <Minus size={12} strokeWidth={3} />}
+          <span style={{ fontSize: '11px', fontWeight: '700' }}>
+            {isPositive ? '+' : isNegative ? '-' : ''}{percentage}%
+          </span>
         </div>
       </div>
 
-      {/* Headline */}
-      <h2 style={{ 
-        fontSize: '1.4rem', 
-        lineHeight: '1.3', 
-        marginBottom: '16px',
-        color: 'var(--text-primary)'
+      <p style={{ 
+        color: 'var(--text-secondary)', 
+        fontSize: '14px', 
+        lineHeight: '1.5',
+        margin: 0,
+        display: '-webkit-box',
+        WebkitLineClamp: 2,
+        WebkitBoxOrient: 'vertical',
+        overflow: 'hidden'
       }}>
-        {title}
-      </h2>
+        {summary || 'No summary available.'}
+      </p>
 
-      {/* Summary */}
-      {summary && (
-        <div style={{ marginBottom: '16px' }}>
-          <span style={{ fontWeight: '600', color: 'var(--text-primary)', fontSize: '0.95rem' }}>Summary: </span>
-          <span style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: '1.6' }}>{summary}</span>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: '8px' }}>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          {tags.map((tag, i) => (
+            <span key={i} style={{
+              backgroundColor: '#1a1a1f',
+              padding: '4px 10px',
+              borderRadius: '6px',
+              fontSize: '10px',
+              fontWeight: '700',
+              color: '#8ba1bd',
+              letterSpacing: '0.05em'
+            }}>
+              {tag}
+            </span>
+          ))}
         </div>
-      )}
-
-      {/* Reasoning (Why it matters) */}
-      {reasoning && (
-        <div style={{ 
-          backgroundColor: 'rgba(99, 102, 241, 0.05)', 
-          borderLeft: '3px solid var(--accent-primary)',
-          padding: '12px 16px',
-          borderRadius: '0 8px 8px 0',
-          marginBottom: '16px'
-        }}>
-          <span style={{ fontWeight: '600', color: 'var(--accent-primary)', fontSize: '0.9rem', display: 'block', marginBottom: '4px' }}>
-            Why it matters
-          </span>
-          <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{reasoning}</span>
+        
+        <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '600' }}>
+          {timeAgo} <span style={{ margin: '0 4px' }}>•</span> <span style={{ color: '#d1d5db' }}>{sourceName}</span>
         </div>
-      )}
+      </div>
 
-      <hr style={{ border: 'none', borderTop: '1px solid var(--border-color)', margin: '20px 0 0 0' }} />
-
-      {/* Sources */}
-      <SourceList sources={sources} />
-      
-    </article>
+    </div>
   );
 };
 

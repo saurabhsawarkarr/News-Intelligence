@@ -660,14 +660,14 @@ Go to: **GitHub Repo → Settings → Secrets and variables → Actions → New 
 | DB is empty (first run) | All articles fetched, filtered, deduplicated, analyzed, stored |
 
 ### End-to-End Test Checklist
-- [ ] Run `python backend/pipeline/run.py` locally → check DB has new articles
-- [ ] Start FastAPI: `uvicorn backend.api.main:app --reload` → hit `/api/news` → valid JSON
-- [ ] Start frontend: `npm run dev` → dashboard loads and displays cards
-- [ ] Apply sentiment filter → cards update correctly
-- [ ] Apply date filter → only that day's news shows
-- [ ] Click source link → opens original article in new tab
-- [ ] Run pipeline twice → confirm no duplicate articles in DB
-- [ ] Feed a known crypto article URL → confirm it's filtered out
+- [x] Run `python backend/pipeline/run.py` locally → check DB has new articles
+- [x] Start FastAPI: `uvicorn backend.api.main:app --reload` → hit `/api/news` → valid JSON
+- [x] Start frontend: `npm run dev` → dashboard loads and displays cards
+- [x] Apply sentiment filter → cards update correctly
+- [x] Apply date filter → only that day's news shows
+- [x] Click source link → opens original article in new tab
+- [x] Run pipeline twice → confirm no duplicate articles in DB
+- [x] Feed a known crypto article URL → confirm it's filtered out
 
 ### Deliverable
 - All test scenarios pass
@@ -717,13 +717,13 @@ Go to: **GitHub Repo → Settings → Secrets and variables → Actions → New 
 - Confirm hourly runs continue working against hosted DB
 
 ### Tasks
-- [ ] Create Supabase project and run migrations
-- [ ] Deploy backend to Render and verify `/api/news` responds
-- [ ] Deploy frontend to Vercel and verify dashboard loads
-- [ ] Update GitHub Secrets with production values (Supabase DB URL)
-- [ ] Test full flow on production: GitHub Actions → Supabase DB → Render API → Vercel UI
-- [ ] Add `README.md` with setup instructions and architecture diagram
-- [ ] Create `.env.example` documenting all required environment variables
+- [x] Create Supabase project and run migrations
+- [x] Deploy backend to Render and verify `/api/news` responds
+- [x] Deploy frontend to Vercel and verify dashboard loads
+- [x] Update GitHub Secrets with production values (Supabase DB URL)
+- [x] Test full flow on production: GitHub Actions → Supabase DB → Render API → Vercel UI
+- [x] Add `README.md` with setup instructions and architecture diagram
+- [x] Create `.env.example` documenting all required environment variables
 
 ### Deliverable
 - Live, publicly accessible dashboard

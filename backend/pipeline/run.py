@@ -26,29 +26,50 @@ def main() -> None:
     logger.info("News Intelligence Pipeline starting…")
     logger.info("Start time: %s", start.isoformat())
 
+    from backend.db.database import init_db
+    init_db()
+
     # ── Phase 1: Fetch ─────────────────────────────────────────────────────
-    # from backend.pipeline.fetcher import fetch_all_feeds
-    # from backend.config import RSS_FEEDS
-    # raw_articles = fetch_all_feeds(RSS_FEEDS)
-    # logger.info("Fetched %d raw articles", len(raw_articles))
+    from backend.pipeline.fetcher import fetch_all_feeds
+    from backend.config import RSS_FEEDS
+    raw_articles = fetch_all_feeds(RSS_FEEDS)
+    logger.info("Fetched %d raw articles", len(raw_articles))
 
     # ── Phase 2A: Filter ───────────────────────────────────────────────────
-    # from backend.pipeline.filter import filter_articles
-    # filtered = filter_articles(raw_articles)
-    # logger.info("After content filter: %d articles", len(filtered))
+    from backend.pipeline.filter import filter_articles
+    filtered = filter_articles(raw_articles)
+    logger.info("After content filter: %d articles", len(filtered))
 
     # ── Phase 2B: Deduplicate ─────────────────────────────────────────────
-    # from backend.pipeline.deduplicator import deduplicate
-    # unique = deduplicate(filtered, existing_urls=set())
-    # logger.info("After deduplication: %d unique articles", len(unique))
+    from backend.db.database import get_session, get_existing_urls
+    
+    with get_session() as db:
+        existing_urls = get_existing_urls(db)
+        
+    from backend.pipeline.deduplicator import deduplicate
+    unique = deduplicate(filtered, existing_urls=existing_urls)
+    logger.info("After deduplication: %d unique articles", len(unique))
+
+    if not unique:
+        logger.info("No new articles to process. Exiting pipeline.")
+        return
 
     # ── Phase 3: AI Analysis ───────────────────────────────────────────────
-    # from backend.pipeline.analyzer import analyze_batch
-    # analyzed = analyze_batch(unique)
-    # logger.info("AI analysis complete: %d articles enriched", len(analyzed))
+    from backend.pipeline.analyzer import analyze_batch
+    analyzed = analyze_batch(unique)
+    logger.info("AI analysis complete: %d articles enriched", len(analyzed))
 
     # ── Phase 4: Store ─────────────────────────────────────────────────────
-    # (Storage implementation in Phase 4)
+    from backend.db.database import save_article
+    with get_session() as db:
+        saved_count = 0
+        for article in analyzed:
+            try:
+                save_article(db, article)
+                saved_count += 1
+            except Exception as e:
+                logger.error("Error saving article '%s': %s", article.get("title"), e)
+        logger.info("Successfully stored %d new articles in the database", saved_count)
 
     elapsed = (datetime.now(timezone.utc) - start).total_seconds()
     logger.info("Pipeline finished in %.1fs", elapsed)
