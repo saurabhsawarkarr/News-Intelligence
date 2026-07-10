@@ -8,7 +8,7 @@ import { useNews } from '../hooks/useNews';
 import { Inbox, Loader2 } from 'lucide-react';
 
 const Dashboard = () => {
-  const { data: articles, total, page, limit, sectors, health, loading, error, filters, updateFilter } = useNews();
+  const { data: articles, total, page, limit, sectors, health, loading, error, filters, updateFilter, lastRefreshed, refresh } = useNews();
   const [selectedArticle, setSelectedArticle] = useState(null);
 
   // If an article is selected, show the detail view
@@ -27,7 +27,7 @@ const Dashboard = () => {
   // Otherwise, show the main feed
   return (
     <div className="app-container">
-      <Navbar health={health} />
+      <Navbar health={health} lastRefreshed={lastRefreshed} onRefresh={refresh} loading={loading} />
       
       <div className="content-container">
         
@@ -44,9 +44,9 @@ const Dashboard = () => {
 
         {loading && articles.length === 0 ? (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '80px 0', color: 'var(--text-muted)' }}>
-            <Loader2 className="spin" size={32} style={{ marginBottom: '16px' }} />
-            <span>Loading intelligence...</span>
-            <style>{`@keyframes spin { 100% { transform: rotate(360deg); } } .spin { animation: spin 1s linear infinite; }`}</style>
+            <Loader2 size={32} style={{ marginBottom: '16px', animation: 'spin 1s linear infinite' }} />
+            <span>Loading intelligence…</span>
+            <style>{`@keyframes spin { 100% { transform: rotate(360deg); } }`}</style>
           </div>
         ) : (
           <>

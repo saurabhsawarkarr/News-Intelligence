@@ -61,23 +61,40 @@ const FilterBar = ({ filters, updateFilter, sectors }) => {
         </div>
 
         {/* Date Filter */}
-        <div style={{ display: 'flex', alignItems: 'center', backgroundColor: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', padding: '4px 8px', border: '1px solid var(--border-color)' }}>
-          <Calendar size={14} color="var(--text-muted)" style={{ marginRight: '6px' }} />
-          <input 
-            type="date" 
+        <div style={{ display: 'flex', alignItems: 'center', backgroundColor: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', padding: '4px 8px', border: '1px solid var(--border-color)', gap: '4px' }}>
+          <Calendar size={14} color="var(--text-muted)" style={{ marginRight: '2px' }} />
+          <input
+            type="date"
             value={filters.date || ''}
             onChange={(e) => updateFilter('date', e.target.value)}
-            style={{ 
-              background: 'transparent', 
-              border: 'none', 
-              color: 'var(--text-primary)',
+            style={{
+              background: 'transparent',
+              border: 'none',
+              color: filters.date ? 'var(--text-primary)' : 'var(--text-muted)',
               outline: 'none',
-              fontSize: '0.9rem',
+              fontSize: '0.85rem',
               fontWeight: '500',
               cursor: 'pointer',
-              colorScheme: 'dark'
+              colorScheme: 'dark',
             }}
           />
+          {filters.date && (
+            <button
+              onClick={() => updateFilter('date', null)}
+              title="Clear date filter"
+              style={{
+                color: 'var(--text-muted)',
+                fontSize: '14px',
+                lineHeight: '1',
+                padding: '0 2px',
+                borderRadius: '4px',
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.color = 'white'}
+              onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-muted)'}
+            >
+              ✕
+            </button>
+          )}
         </div>
       </div>
       

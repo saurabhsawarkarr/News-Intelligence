@@ -6,6 +6,9 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5173,
+    host: true, // Allow external connections (0.0.0.0)
+    allowedHosts: true, // Allow ngrok/localtunnel/localhost.run domains
+    cors: true,
     proxy: {
       // Proxy /api requests to the FastAPI backend during development
       '/api': {

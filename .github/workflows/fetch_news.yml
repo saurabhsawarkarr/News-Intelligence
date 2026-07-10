@@ -2,8 +2,8 @@ name: Fetch & Analyze News
 
 on:
   schedule:
-    - cron: '0 * * * *'    # Every hour at :00 UTC
-  workflow_dispatch:         # Manual trigger from GitHub Actions tab
+    - cron: '0 * * * *'    # Every hour at :00 UTC (= every hour at 5:30 IST)
+  workflow_dispatch:         # Also triggerable manually from GitHub Actions tab
 
 jobs:
   run-pipeline:
@@ -30,6 +30,7 @@ jobs:
       - name: Install dependencies
         run: pip install -r backend/requirements.txt
 
+      # Cache the ~90MB SentenceTransformer model so it is not re-downloaded every hour
       - name: Cache SentenceTransformer model
         uses: actions/cache@v4
         with:
@@ -39,6 +40,11 @@ jobs:
       - name: Download SentenceTransformer model
         run: python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2')"
 
+      # ── REQUIRED SECRETS (set in GitHub Repo → Settings → Secrets) ──────────
+      # GROQ_API_KEY : Free key from https://console.groq.com
+      # DATABASE_URL : PostgreSQL connection string, e.g. from Supabase free tier
+      #                Format: postgresql+psycopg://user:password@host:5432/dbname
+      # ─────────────────────────────────────────────────────────────────────────
       - name: Run news pipeline
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
@@ -47,4 +53,8 @@ jobs:
 
       - name: Report pipeline results
         if: always()
-        run: echo "Pipeline job finished with status ${{ job.status }}"
+        run: |
+          echo "================================================"
+          echo "Pipeline finished with status: ${{ job.status }}"
+          echo "Triggered at: $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+          echo "================================================"

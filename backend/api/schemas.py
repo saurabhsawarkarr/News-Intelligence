@@ -6,10 +6,10 @@ Defines the exact JSON shapes returned by /api/news and related routes.
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, field_serializer
 
 
 class SourceSchema(BaseModel):
@@ -48,6 +48,22 @@ class ArticleSchema(BaseModel):
     sources: list[SourceSchema]
 
     model_config = {"from_attributes": True}
+
+    @field_serializer("published_at", "fetched_at", "analyzed_at")
+    def serialize_dt_as_utc(self, dt: datetime | None) -> str | None:
+        """Ensure all datetimes are serialized with a UTC 'Z' suffix.
+        
+        SQLite stores naive datetimes; we treat them as UTC so the
+        frontend date-fns library correctly computes relative timestamps.
+        """
+        if dt is None:
+            return None
+        # If already timezone-aware, convert to UTC; otherwise assume UTC.
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        else:
+            dt = dt.astimezone(timezone.utc)
+        return dt.strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 class NewsListResponse(BaseModel):

@@ -95,9 +95,15 @@ def save_article(db: Session, article_data: dict) -> None:
     
     try:
         # Create canonical article
+        # Strip tzinfo for SQLite compatibility (stores as naive datetime)
+        pub_at = article_data["published_at"]
+        if pub_at and hasattr(pub_at, 'tzinfo') and pub_at.tzinfo is not None:
+            from datetime import timezone as tz
+            pub_at = pub_at.astimezone(tz.utc).replace(tzinfo=None)
+        
         article = Article(
             canonical_title=article_data["title"],
-            published_at=article_data["published_at"],
+            published_at=pub_at,
             is_analyzed=article_data.get("is_analyzed", False)
         )
         db.add(article)
@@ -110,13 +116,18 @@ def save_article(db: Session, article_data: dict) -> None:
             if url_exists(db, src["url"]):
                 logger.warning(f"Source URL already exists, skipping insert for: {src['url']}")
                 continue
+            
+            src_pub = src.get("published_at")
+            if src_pub and hasattr(src_pub, 'tzinfo') and src_pub.tzinfo is not None:
+                from datetime import timezone as tz
+                src_pub = src_pub.astimezone(tz.utc).replace(tzinfo=None)
                 
             db_source = Source(
                 article_id=article.id,
                 source_name=src["source_name"],
                 url=src["url"],
                 description=src.get("description", ""),
-                published_at=src["published_at"]
+                published_at=src_pub
             )
             db.add(db_source)
             

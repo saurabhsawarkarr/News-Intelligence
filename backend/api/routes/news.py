@@ -8,7 +8,7 @@ GET /api/health         → pipeline health check
 
 from __future__ import annotations
 
-from datetime import datetime, date as date_type
+from datetime import datetime, date as date_type, timezone
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import func, or_
@@ -25,8 +25,8 @@ def _flatten_article(article: Article) -> dict[str, Any]:
     data = {
         "id": article.id,
         "title": article.canonical_title,
-        "published_at": article.published_at,
-        "fetched_at": article.fetched_at,
+        "published_at": article.published_at.replace(tzinfo=timezone.utc) if article.published_at else None,
+        "fetched_at": article.fetched_at.replace(tzinfo=timezone.utc) if article.fetched_at else None,
         "is_analyzed": article.is_analyzed,
         "sources": [{"name": s.source_name, "url": s.url} for s in article.sources]
     }
@@ -55,20 +55,19 @@ async def get_news(
     
     query = db.query(Article).outerjoin(AIAnalysis)
     
-    # Filter by date (default to today if not provided)
-    target_date = datetime.utcnow().date()
+    # Filter by date only when explicitly provided
     if date:
         try:
             target_date = datetime.strptime(date, "%Y-%m-%d").date()
+            # SQLite-safe range filter (tz-naive, strip tzinfo from stored datetimes)
+            start_of_day = datetime(target_date.year, target_date.month, target_date.day, 0, 0, 0)
+            end_of_day = datetime(target_date.year, target_date.month, target_date.day, 23, 59, 59, 999999)
+            query = query.filter(
+                Article.published_at >= start_of_day,
+                Article.published_at <= end_of_day
+            )
         except ValueError:
-            pass
-            
-    # Assuming published_at is stored as datetime, we filter by the date part
-    # SQLite compatibility for date extraction:
-    # Instead of func.date, we can just do a range filter between start of day and end of day
-    start_of_day = datetime(target_date.year, target_date.month, target_date.day)
-    end_of_day = datetime(target_date.year, target_date.month, target_date.day, 23, 59, 59, 999999)
-    query = query.filter(Article.published_at >= start_of_day, Article.published_at <= end_of_day)
+            pass  # Invalid date string — ignore filter
 
     # Filter by sentiment
     if sentiment.lower() != "all":
@@ -88,10 +87,10 @@ async def get_news(
     
     # Order and paginate
     query = query.order_by(Article.published_at.desc())
-    articles = query.offset((page - 1) * limit).limit(limit).all()
+    articles_result = query.offset((page - 1) * limit).limit(limit).all()
     
     # Flatten data
-    flattened_data = [_flatten_article(a) for a in articles]
+    flattened_data = [_flatten_article(a) for a in articles_result]
 
     return {
         "data": flattened_data,
@@ -122,5 +121,5 @@ async def get_sectors(db: Session = Depends(get_db)):
 async def health_check(db: Session = Depends(get_db)):
     """Return API health status and timestamp of the last pipeline run."""
     last_article = db.query(Article).order_by(Article.fetched_at.desc()).first()
-    last_run = last_article.fetched_at if last_article else None
+    last_run = last_article.fetched_at.replace(tzinfo=timezone.utc) if last_article and last_article.fetched_at else None
     return {"status": "ok", "last_run": last_run}

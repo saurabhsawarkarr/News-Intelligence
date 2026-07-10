@@ -1,37 +1,42 @@
 import React from 'react';
 import { formatDistanceToNow, parseISO } from 'date-fns';
-import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
-
-// Deterministic pseudo-random number generator based on string
-const getPseudoRandom = (str, min, max) => {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    hash = str.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  const random = Math.abs(Math.sin(hash)) * 10000;
-  return Math.floor((random - Math.floor(random)) * (max - min + 1)) + min;
-};
+import { TrendingUp, TrendingDown, Minus, ExternalLink } from 'lucide-react';
 
 const NewsCard = ({ article, onClick }) => {
-  const { title, summary, published_at, sources, sentiment, primary_sector, secondary_sector, id } = article;
-  
-  const timeAgo = formatDistanceToNow(parseISO(published_at), { addSuffix: true }).replace('about ', '');
-  const sourceName = sources && sources.length > 0 ? sources[0].name : 'Unknown';
-  
-  // Generate dummy percentages for the vibe design
-  let percentage = 0;
-  let isPositive = false;
-  let isNegative = false;
-  
-  if (sentiment === 'Positive') {
-    percentage = getPseudoRandom(id, 75, 98);
-    isPositive = true;
-  } else if (sentiment === 'Negative') {
-    percentage = getPseudoRandom(id, 65, 95);
-    isNegative = true;
-  } else {
-    percentage = getPseudoRandom(id, 5, 25);
+  const { title, summary, published_at, sources, sentiment, primary_sector, secondary_sector } = article;
+
+  let timeAgo = 'Unknown time';
+  try {
+    if (published_at) {
+      timeAgo = formatDistanceToNow(parseISO(published_at), { addSuffix: true }).replace('about ', '');
+    }
+  } catch (e) {
+    // Invalid date string — use fallback
   }
+
+  const isPositive = sentiment === 'Positive';
+  const isNegative = sentiment === 'Negative';
+
+  const sentimentColor = isPositive
+    ? 'var(--color-positive)'
+    : isNegative
+    ? 'var(--color-negative)'
+    : 'var(--color-neutral)';
+
+  const sentimentBg = isPositive
+    ? 'var(--color-positive-bg)'
+    : isNegative
+    ? 'var(--color-negative-bg)'
+    : 'var(--color-neutral-bg)';
+
+  const sentimentBorder = isPositive
+    ? 'rgba(0,255,136,0.2)'
+    : isNegative
+    ? 'rgba(255,68,68,0.2)'
+    : 'rgba(156,163,175,0.15)';
+
+  const SentimentIcon = isPositive ? TrendingUp : isNegative ? TrendingDown : Minus;
+  const sentimentLabel = sentiment || 'Neutral';
 
   // Tags
   const tags = [];
@@ -39,88 +44,153 @@ const NewsCard = ({ article, onClick }) => {
   if (secondary_sector) tags.push(secondary_sector.toUpperCase());
 
   return (
-    <div 
+    <div
       onClick={() => onClick(article)}
       style={{
         backgroundColor: 'rgba(255, 255, 255, 0.03)',
         border: '1px solid var(--border-color)',
-        borderRadius: '24px',
+        borderRadius: '20px',
         padding: '20px',
         cursor: 'pointer',
         display: 'flex',
         flexDirection: 'column',
-        gap: '12px',
-        transition: 'transform 0.2s',
+        gap: '14px',
+        transition: 'border-color 0.2s, background 0.2s',
       }}
-      onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(0.98)'}
-      onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)';
+        e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.borderColor = 'var(--border-color)';
+        e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
+      }}
     >
-      
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px' }}>
-        <h2 style={{ 
-          fontSize: '18px', 
-          lineHeight: '1.3', 
+      {/* Top row: Sentiment badge */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
+        <h2 style={{
+          fontSize: '17px',
+          lineHeight: '1.35',
           margin: 0,
           color: 'var(--text-primary)',
-          flex: 1
+          flex: 1,
+          fontWeight: '700',
         }}>
           {title}
         </h2>
-        
-        {/* Sentiment Badge */}
+
+        {/* Correct Sentiment Badge — text only, no fake % */}
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '4px',
-          padding: '4px 10px',
-          borderRadius: '12px',
-          backgroundColor: isPositive ? 'var(--color-positive-bg)' : isNegative ? 'var(--color-negative-bg)' : 'var(--color-neutral-bg)',
-          color: isPositive ? 'var(--color-positive)' : isNegative ? '#ff6b6b' : 'var(--color-neutral)',
-          border: `1px solid ${isPositive ? 'rgba(0,255,136,0.1)' : isNegative ? 'rgba(255,68,68,0.1)' : 'rgba(255,255,255,0.05)'}`,
-          flexShrink: 0
+          gap: '5px',
+          padding: '5px 10px',
+          borderRadius: '10px',
+          backgroundColor: sentimentBg,
+          color: sentimentColor,
+          border: `1px solid ${sentimentBorder}`,
+          flexShrink: 0,
+          whiteSpace: 'nowrap',
         }}>
-          {isPositive ? <TrendingUp size={12} strokeWidth={3} /> : isNegative ? <TrendingDown size={12} strokeWidth={3} /> : <Minus size={12} strokeWidth={3} />}
-          <span style={{ fontSize: '11px', fontWeight: '700' }}>
-            {isPositive ? '+' : isNegative ? '-' : ''}{percentage}%
+          <SentimentIcon size={12} strokeWidth={3} />
+          <span style={{ fontSize: '10px', fontWeight: '800', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+            {sentimentLabel}
           </span>
         </div>
       </div>
 
-      <p style={{ 
-        color: 'var(--text-secondary)', 
-        fontSize: '14px', 
-        lineHeight: '1.5',
+      {/* Summary — 2 line clamp */}
+      <p style={{
+        color: 'var(--text-secondary)',
+        fontSize: '13.5px',
+        lineHeight: '1.55',
         margin: 0,
         display: '-webkit-box',
         WebkitLineClamp: 2,
         WebkitBoxOrient: 'vertical',
-        overflow: 'hidden'
+        overflow: 'hidden',
       }}>
-        {summary || 'No summary available.'}
+        {summary || 'No AI summary available yet.'}
       </p>
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: '8px' }}>
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+      {/* Bottom row: sectors + time + sources */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: '8px' }}>
+        {/* Sector tags */}
+        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', flex: 1 }}>
           {tags.map((tag, i) => (
             <span key={i} style={{
-              backgroundColor: '#1a1a1f',
-              padding: '4px 10px',
+              backgroundColor: '#1a1a22',
+              padding: '3px 9px',
               borderRadius: '6px',
               fontSize: '10px',
               fontWeight: '700',
               color: '#8ba1bd',
-              letterSpacing: '0.05em'
+              letterSpacing: '0.05em',
             }}>
               {tag}
             </span>
           ))}
         </div>
-        
-        <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '600' }}>
-          {timeAgo} <span style={{ margin: '0 4px' }}>•</span> <span style={{ color: '#d1d5db' }}>{sourceName}</span>
-        </div>
+
+        {/* Time */}
+        <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '500', flexShrink: 0 }}>
+          {timeAgo}
+        </span>
       </div>
 
+      {/* Sources — ALL sources listed */}
+      {sources && sources.length > 0 && (
+        <div style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: '6px',
+          paddingTop: '8px',
+          borderTop: '1px solid rgba(255,255,255,0.04)',
+        }}>
+          {sources.map((src, i) => (
+            src.url ? (
+              <a
+                key={i}
+                href={src.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  color: '#94a3b8',
+                  fontSize: '11px',
+                  fontWeight: '600',
+                  textDecoration: 'none',
+                  padding: '3px 8px',
+                  borderRadius: '6px',
+                  border: '1px solid rgba(255,255,255,0.06)',
+                  backgroundColor: 'rgba(255,255,255,0.02)',
+                  transition: 'color 0.2s, border-color 0.2s',
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = 'white'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = '#94a3b8'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'; }}
+              >
+                <ExternalLink size={10} />
+                {src.name}
+              </a>
+            ) : (
+              <span key={i} style={{
+                color: '#94a3b8',
+                fontSize: '11px',
+                fontWeight: '600',
+                padding: '3px 8px',
+                borderRadius: '6px',
+                border: '1px solid rgba(255,255,255,0.06)',
+                backgroundColor: 'rgba(255,255,255,0.02)',
+              }}>
+                {src.name}
+              </span>
+            )
+          ))}
+        </div>
+      )}
     </div>
   );
 };
