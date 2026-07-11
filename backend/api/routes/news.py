@@ -15,8 +15,8 @@ from sqlalchemy import func, or_
 from typing import Any
 
 from backend.db.database import get_db
-from backend.db.models import Article, AIAnalysis
-from backend.api.schemas import NewsListResponse, ArticleSchema, HealthResponse
+from backend.db.models import Article, AIAnalysis, DailySummary
+from backend.api.schemas import NewsListResponse, ArticleSchema, HealthResponse, DailySummarySchema
 
 router = APIRouter(prefix="/api")
 
@@ -115,6 +115,30 @@ async def get_sectors(db: Session = Depends(get_db)):
             sectors.add(row[0].strip())
             
     return sorted(list(sectors))
+
+
+@router.get("/daily-summary", response_model=DailySummarySchema)
+async def get_daily_summary(
+    date: str | None = Query(None, description="YYYY-MM-DD"),
+    db: Session = Depends(get_db)
+):
+    """Return the daily summary for a specific date, or the latest available if no date is provided."""
+    query = db.query(DailySummary)
+    
+    if date:
+        try:
+            target_date = datetime.strptime(date, "%Y-%m-%d").date()
+            query = query.filter(DailySummary.date_val == target_date)
+        except ValueError:
+            pass
+            
+    summary = query.order_by(DailySummary.date_val.desc()).first()
+    
+    if not summary:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="Daily summary not found")
+        
+    return summary
 
 
 @router.get("/health", response_model=HealthResponse)

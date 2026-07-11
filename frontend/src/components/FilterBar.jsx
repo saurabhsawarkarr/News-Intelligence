@@ -29,10 +29,10 @@ const FilterBar = ({ filters, updateFilter, sectors }) => {
               cursor: 'pointer'
             }}
           >
-            <option value="All">All Sentiments</option>
-            <option value="Positive">Positive</option>
-            <option value="Negative">Negative</option>
-            <option value="Neutral">Neutral</option>
+            <option style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)' }} value="All">All Sentiments</option>
+            <option style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)' }} value="Positive">Positive</option>
+            <option style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)' }} value="Negative">Negative</option>
+            <option style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)' }} value="Neutral">Neutral</option>
           </select>
         </div>
 
@@ -53,9 +53,9 @@ const FilterBar = ({ filters, updateFilter, sectors }) => {
               maxWidth: '150px'
             }}
           >
-            <option value="All">All Sectors</option>
+            <option style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)' }} value="All">All Sectors</option>
             {sectors && sectors.map(sec => (
-              <option key={sec} value={sec}>{sec}</option>
+              <option style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)' }} key={sec} value={sec}>{sec}</option>
             ))}
           </select>
         </div>

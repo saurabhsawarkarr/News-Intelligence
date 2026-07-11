@@ -71,6 +71,13 @@ def main() -> None:
                 logger.error("Error saving article '%s': %s", article.get("title"), e)
         logger.info("Successfully stored %d new articles in the database", saved_count)
 
+    # ── Phase 5: Daily Summary ─────────────────────────────────────────────
+    # Generate summary for the current day
+    from backend.pipeline.summarizer import generate_daily_summary
+    with get_session() as db:
+        today = datetime.now(timezone.utc).date()
+        generate_daily_summary(db, today)
+
     elapsed = (datetime.now(timezone.utc) - start).total_seconds()
     logger.info("Pipeline finished in %.1fs", elapsed)
     logger.info("═══════════════════════════════════════")

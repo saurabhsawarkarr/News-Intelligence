@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import uuid
 
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, String, Text, Uuid
+from sqlalchemy import Boolean, Column, DateTime, Date, ForeignKey, String, Text, Uuid
 from sqlalchemy.sql import func
 from sqlalchemy.orm import DeclarativeBase, relationship
 
@@ -62,3 +62,16 @@ class AIAnalysis(Base):
     analyzed_at      = Column(DateTime, server_default=func.now())
 
     article = relationship("Article", back_populates="analysis")
+
+
+class DailySummary(Base):
+    __tablename__ = "daily_summaries"
+
+    id         = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    date_val   = Column(Date, unique=True, nullable=False)
+    sentiment  = Column(String(10), nullable=False)
+    summary    = Column(Text, nullable=False)
+    events     = Column(Text)
+    sectors    = Column(Text)
+    reasoning  = Column(Text)
+    created_at = Column(DateTime, server_default=func.now())

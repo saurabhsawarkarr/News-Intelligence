@@ -1,11 +1,15 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { newsApi } from '../api/newsApi';
 
+import { format } from 'date-fns';
+
 // Auto-refresh interval: 5 minutes (matches problem statement's hourly pipeline;
 // frontend checks every 5 min so it picks up new data shortly after the pipeline runs)
 const AUTO_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 
-export const useNews = (initialFilters = { sentiment: 'All', date: null, sector: null, page: 1 }) => {
+const defaultDate = format(new Date(), 'yyyy-MM-dd');
+
+export const useNews = (initialFilters = { sentiment: 'All', date: defaultDate, sector: null, page: 1 }) => {
   const [data, setData] = useState({ data: [], total: 0, page: 1, limit: 20 });
   const [sectors, setSectors] = useState([]);
   const [health, setHealth] = useState({ status: 'unknown', last_run: null });

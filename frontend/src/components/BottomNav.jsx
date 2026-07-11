@@ -25,28 +25,6 @@ const BottomNav = () => {
         </div>
         <span style={{ fontSize: '11px', fontWeight: '600', marginTop: '4px' }}>News</span>
       </div>
-
-      {/* Inactive Tabs */}
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: 'var(--text-muted)', cursor: 'pointer' }}>
-        <div style={{ height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <LineChart size={20} />
-        </div>
-        <span style={{ fontSize: '11px', fontWeight: '500', marginTop: '4px' }}>Markets</span>
-      </div>
-
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: 'var(--text-muted)', cursor: 'pointer' }}>
-        <div style={{ height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Wallet size={20} />
-        </div>
-        <span style={{ fontSize: '11px', fontWeight: '500', marginTop: '4px' }}>Portfolio</span>
-      </div>
-
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: 'var(--text-muted)', cursor: 'pointer' }}>
-        <div style={{ height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Bell size={20} />
-        </div>
-        <span style={{ fontSize: '11px', fontWeight: '500', marginTop: '4px' }}>Alerts</span>
-      </div>
     </div>
   );
 };
