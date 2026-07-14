@@ -72,10 +72,14 @@ def main() -> None:
         logger.info("Successfully stored %d new articles in the database", saved_count)
 
     # ── Phase 5: Daily Summary ─────────────────────────────────────────────
-    # Generate summary for the current day
+    # Generate summary for the current IST calendar date.
+    # Articles and the UI use IST (UTC+05:30), so keying the summary on the
+    # UTC date would mismatch when running after 18:30 UTC (midnight IST+).
     from backend.pipeline.summarizer import generate_daily_summary
+    from datetime import timedelta
     with get_session() as db:
-        today = datetime.now(timezone.utc).date()
+        IST_OFFSET = timedelta(hours=5, minutes=30)
+        today = (datetime.now(timezone.utc) + IST_OFFSET).date()
         generate_daily_summary(db, today)
 
     elapsed = (datetime.now(timezone.utc) - start).total_seconds()

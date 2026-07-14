@@ -1,4 +1,4 @@
-# Implementation Plan: AI-Powered Indian Stock Market News Intelligence Platform
+  # Implementation Plan: AI-Powered Indian Stock Market News Intelligence Platform
 
 > **Stack:** Python (FastAPI) · Groq LLM · Free RSS Feeds · PostgreSQL · React + Vite · GitHub Actions
 > **Total Cost:** ₹0 / $0 (all free tiers)
@@ -159,11 +159,11 @@ def parse_date(date_str: str) -> datetime:
 ```
 
 ### Tasks
-- [x] Implement `fetcher.py` with error handling and retry logic
-- [x] Handle different date formats from each RSS source
-- [x] Add exponential backoff for failed feed fetches
-- [x] Write unit test: assert each feed returns ≥ 1 article
-- [x] Log fetch summary (articles per source, failures)
+- [ ] Implement `fetcher.py` with error handling and retry logic
+- [ ] Handle different date formats from each RSS source
+- [ ] Add exponential backoff for failed feed fetches
+- [ ] Write unit test: assert each feed returns ≥ 1 article
+- [ ] Log fetch summary (articles per source, failures)
 
 ### Deliverable
 - Running `python pipeline/fetcher.py` prints a list of raw articles from all 9 sources
@@ -253,14 +253,14 @@ def deduplicate(articles: list[dict], existing_urls: set) -> list[dict]:
 ```
 
 ### Tasks
-- [x] Implement `filter.py` with keyword exclusion lists
-- [x] Implement `deduplicator.py` — all 3 steps
-- [x] Implement source merging: when duplicate found, append to `sources[]` of existing record
-- [x] Unit test: feed 10 known duplicates → assert output = 1 merged article with 10 sources
-- [x] Unit test: feed crypto article → assert it gets filtered out
+- [ ] Implement `filter.py` with keyword exclusion lists
+- [ ] Implement `deduplicator.py` — all 3 steps
+- [ ] Implement source merging: when duplicate found, append to `sources[]` of existing record
+- [ ] Unit test: feed 10 known duplicates → assert output = 1 merged article with 10 sources
+- [ ] Unit test: feed crypto article → assert it gets filtered out
 
 ### Deliverable
-- Running tests validates the deduplication and filtering logicque, relevant articles with merged sources
+- Pipeline runs: fetch → filter → deduplicate → prints unique, relevant articles with merged sources
 
 ---
 
@@ -333,14 +333,14 @@ def analyze_batch(articles: list[dict]) -> list[dict]:
 ```
 
 ### Tasks
-- [x] Register for free Groq API key at [console.groq.com](https://console.groq.com)
-- [x] Implement `analyzer.py` with system prompt and structured JSON output
-- [x] Implement rate limiting (stay within 30 req/min)
-- [x] Implement retry on failure (max 3 retries with backoff)
-- [x] Mark articles `is_analyzed = false` if LLM call fails; retry in next cycle
-- [x] Unit test: assert response contains all 5 required fields
-- [x] Validate sentiment is one of: `Positive`, `Negative`, `Neutral`
-- [x] Test with sample articles and manually verify sector classification accuracy
+- [ ] Register for free Groq API key at [console.groq.com](https://console.groq.com)
+- [ ] Implement `analyzer.py` with system prompt and structured JSON output
+- [ ] Implement rate limiting (stay within 30 req/min)
+- [ ] Implement retry on failure (max 3 retries with backoff)
+- [ ] Mark articles `is_analyzed = false` if LLM call fails; retry in next cycle
+- [ ] Unit test: assert response contains all 5 required fields
+- [ ] Validate sentiment is one of: `Positive`, `Negative`, `Neutral`
+- [ ] Test with sample articles and manually verify sector classification accuracy
 
 ### Deliverable
 - Given any article title + description → Groq returns valid structured JSON with all fields filled
@@ -410,11 +410,11 @@ def get_unanalyzed(db) -> list[Article]: ...
 ```
 
 ### Tasks
-- [x] Define all 3 ORM models in `models.py`
-- [x] Set up Alembic for migrations (`alembic init`, create initial migration)
-- [x] Implement DB utility functions in `db/database.py`
-- [x] Implement atomic transaction: write article + sources + analysis together (rollback on fail)
-- [x] Test: insert article → check it appears in DB → run pipeline again → confirm no duplicate inserted
+- [ ] Define all 3 ORM models in `models.py`
+- [ ] Set up Alembic for migrations (`alembic init`, create initial migration)
+- [ ] Implement DB utility functions in `db/database.py`
+- [ ] Implement atomic transaction: write article + sources + analysis together (rollback on fail)
+- [ ] Test: insert article → check it appears in DB → run pipeline again → confirm no duplicate inserted
 
 ### Deliverable
 - Articles, sources, and AI analysis are persisted correctly after each pipeline run
@@ -487,12 +487,12 @@ async def get_news(sentiment: str = "All", date: str = None, page: int = 1, limi
 ```
 
 ### Tasks
-- [x] Set up FastAPI app with CORS enabled
-- [x] Implement `GET /api/news` with sentiment + date + pagination filters
-- [x] Implement `GET /api/news/sectors` (for frontend sector filter dropdown)
-- [x] Implement `GET /api/health` (returns last pipeline run timestamp)
-- [x] Add Pydantic response models for type safety
-- [x] Test all endpoints using FastAPI's auto-generated `/docs` (Swagger UI)
+- [ ] Set up FastAPI app with CORS enabled
+- [ ] Implement `GET /api/news` with sentiment + date + pagination filters
+- [ ] Implement `GET /api/news/sectors` (for frontend sector filter dropdown)
+- [ ] Implement `GET /api/health` (returns last pipeline run timestamp)
+- [ ] Add Pydantic response models for type safety
+- [ ] Test all endpoints using FastAPI's auto-generated `/docs` (Swagger UI)
 
 ### Deliverable
 - API returns filtered, paginated news data correctly
@@ -547,16 +547,16 @@ Each card shows:
 ```
 
 ### Tasks
-- [x] Initialize Vite + React project: `npm create vite@latest frontend -- --template react`
-- [x] Build `NewsCard.jsx` with all fields (headline, summary, reasoning, sources, time)
-- [x] Build `SentimentBadge.jsx` (green = Positive, red = Negative, grey = Neutral)
-- [x] Build `SectorTag.jsx` for primary + secondary sector chips
-- [x] Build `FilterBar.jsx` — Sentiment dropdown + Date picker
-- [x] Build `SourceList.jsx` — clickable source links that open original article
-- [x] Implement `useNews.js` hook with API call + loading/error states
-- [x] Implement auto-refresh indicator (shows "Last updated: X mins ago")
-- [x] Add empty state when no news matches filter
-- [x] Make layout responsive (mobile-friendly)
+- [ ] Initialize Vite + React project: `npm create vite@latest frontend -- --template react`
+- [ ] Build `NewsCard.jsx` with all fields (headline, summary, reasoning, sources, time)
+- [ ] Build `SentimentBadge.jsx` (green = Positive, red = Negative, grey = Neutral)
+- [ ] Build `SectorTag.jsx` for primary + secondary sector chips
+- [ ] Build `FilterBar.jsx` — Sentiment dropdown + Date picker
+- [ ] Build `SourceList.jsx` — clickable source links that open original article
+- [ ] Implement `useNews.js` hook with API call + loading/error states
+- [ ] Implement auto-refresh indicator (shows "Last updated: X mins ago")
+- [ ] Add empty state when no news matches filter
+- [ ] Make layout responsive (mobile-friendly)
 
 ### Deliverable
 - Dashboard loads news from API
@@ -626,12 +626,12 @@ Go to: **GitHub Repo → Settings → Secrets and variables → Actions → New 
 | `DATABASE_URL` | PostgreSQL connection string (Supabase free tier recommended) |
 
 ### Tasks
-- [x] Create `.github/workflows/fetch_news.yml`
-- [x] Add `GROQ_API_KEY` and `DATABASE_URL` to GitHub repo secrets
-- [x] Test manual trigger from GitHub Actions tab → confirm pipeline runs end-to-end
-- [x] Verify cron trigger fires correctly after 1 hour
-- [x] Set up email/GitHub notifications on workflow failure
-- [x] Add SentenceTransformer model caching to avoid re-downloading on every run
+- [ ] Create `.github/workflows/fetch_news.yml`
+- [ ] Add `GROQ_API_KEY` and `DATABASE_URL` to GitHub repo secrets
+- [ ] Test manual trigger from GitHub Actions tab → confirm pipeline runs end-to-end
+- [ ] Verify cron trigger fires correctly after 1 hour
+- [ ] Set up email/GitHub notifications on workflow failure
+- [ ] Add SentenceTransformer model caching to avoid re-downloading on every run
 
 ### Deliverable
 - GitHub Actions runs every hour automatically
@@ -660,14 +660,14 @@ Go to: **GitHub Repo → Settings → Secrets and variables → Actions → New 
 | DB is empty (first run) | All articles fetched, filtered, deduplicated, analyzed, stored |
 
 ### End-to-End Test Checklist
-- [x] Run `python backend/pipeline/run.py` locally → check DB has new articles
-- [x] Start FastAPI: `uvicorn backend.api.main:app --reload` → hit `/api/news` → valid JSON
-- [x] Start frontend: `npm run dev` → dashboard loads and displays cards
-- [x] Apply sentiment filter → cards update correctly
-- [x] Apply date filter → only that day's news shows
-- [x] Click source link → opens original article in new tab
-- [x] Run pipeline twice → confirm no duplicate articles in DB
-- [x] Feed a known crypto article URL → confirm it's filtered out
+- [ ] Run `python backend/pipeline/run.py` locally → check DB has new articles
+- [ ] Start FastAPI: `uvicorn backend.api.main:app --reload` → hit `/api/news` → valid JSON
+- [ ] Start frontend: `npm run dev` → dashboard loads and displays cards
+- [ ] Apply sentiment filter → cards update correctly
+- [ ] Apply date filter → only that day's news shows
+- [ ] Click source link → opens original article in new tab
+- [ ] Run pipeline twice → confirm no duplicate articles in DB
+- [ ] Feed a known crypto article URL → confirm it's filtered out
 
 ### Deliverable
 - All test scenarios pass
@@ -717,13 +717,13 @@ Go to: **GitHub Repo → Settings → Secrets and variables → Actions → New 
 - Confirm hourly runs continue working against hosted DB
 
 ### Tasks
-- [x] Create Supabase project and run migrations
-- [x] Deploy backend to Render and verify `/api/news` responds
-- [x] Deploy frontend to Vercel and verify dashboard loads
-- [x] Update GitHub Secrets with production values (Supabase DB URL)
-- [x] Test full flow on production: GitHub Actions → Supabase DB → Render API → Vercel UI
-- [x] Add `README.md` with setup instructions and architecture diagram
-- [x] Create `.env.example` documenting all required environment variables
+- [ ] Create Supabase project and run migrations
+- [ ] Deploy backend to Render and verify `/api/news` responds
+- [ ] Deploy frontend to Vercel and verify dashboard loads
+- [ ] Update GitHub Secrets with production values (Supabase DB URL)
+- [ ] Test full flow on production: GitHub Actions → Supabase DB → Render API → Vercel UI
+- [ ] Add `README.md` with setup instructions and architecture diagram
+- [ ] Create `.env.example` documenting all required environment variables
 
 ### Deliverable
 - Live, publicly accessible dashboard

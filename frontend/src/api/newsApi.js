@@ -40,5 +40,15 @@ export const newsApi = {
       console.error('Error fetching health status:', error);
       throw error;
     }
+  },
+  
+  triggerRefresh: async () => {
+    try {
+      const response = await api.post('/news/refresh');
+      return response.data;
+    } catch (error) {
+      console.error('Error triggering refresh:', error);
+      throw error;
+    }
   }
 };

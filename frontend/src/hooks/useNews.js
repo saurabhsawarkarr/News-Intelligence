@@ -1,15 +1,13 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { newsApi } from '../api/newsApi';
 
-import { format } from 'date-fns';
-
 // Auto-refresh interval: 5 minutes (matches problem statement's hourly pipeline;
 // frontend checks every 5 min so it picks up new data shortly after the pipeline runs)
 const AUTO_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 
-const defaultDate = format(new Date(), 'yyyy-MM-dd');
-
-export const useNews = (initialFilters = { sentiment: 'All', date: defaultDate, sector: null, page: 1 }) => {
+// Default date is null so we show all recent news on load (not just today's,
+// which may be empty if the pipeline hasn't run yet today)
+export const useNews = (initialFilters = { sentiment: 'All', date: null, sector: null, page: 1 }) => {
   const [data, setData] = useState({ data: [], total: 0, page: 1, limit: 20 });
   const [sectors, setSectors] = useState([]);
   const [health, setHealth] = useState({ status: 'unknown', last_run: null });
@@ -17,6 +15,7 @@ export const useNews = (initialFilters = { sentiment: 'All', date: defaultDate, 
   const [error, setError] = useState(null);
   const [filters, setFilters] = useState(initialFilters);
   const [lastRefreshed, setLastRefreshed] = useState(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Use a ref to always have access to latest filters in the interval callback
   const filtersRef = useRef(filters);
@@ -91,16 +90,28 @@ export const useNews = (initialFilters = { sentiment: 'All', date: defaultDate, 
     }));
   };
 
-  const refresh = useCallback(() => {
-    fetchMetadata();
-    fetchNews(filtersRef.current);
+  const refresh = useCallback(async () => {
+    try {
+      setIsRefreshing(true);
+      const minSpinTime = new Promise(resolve => setTimeout(resolve, 1000));
+      await Promise.all([
+        newsApi.triggerRefresh(),
+        minSpinTime
+      ]);
+      await fetchMetadata();
+      await fetchNews(filtersRef.current);
+    } catch (err) {
+      console.error('Failed to trigger refresh:', err);
+    } finally {
+      setIsRefreshing(false);
+    }
   }, [fetchMetadata, fetchNews]);
 
   return {
     ...data,
     sectors,
     health,
-    loading,
+    loading: loading || isRefreshing,
     error,
     filters,
     lastRefreshed,

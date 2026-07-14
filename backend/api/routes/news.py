@@ -8,7 +8,7 @@ GET /api/health         → pipeline health check
 
 from __future__ import annotations
 
-from datetime import datetime, date as date_type, timezone
+from datetime import datetime, date as date_type, timezone, timedelta
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import func, or_
@@ -19,6 +19,11 @@ from backend.db.models import Article, AIAnalysis, DailySummary
 from backend.api.schemas import NewsListResponse, ArticleSchema, HealthResponse, DailySummarySchema
 
 router = APIRouter(prefix="/api")
+
+# IST is UTC+5:30 — articles are stored as naive UTC in SQLite.
+# To filter by a local IST calendar date, subtract IST offset to get the
+# equivalent UTC window.
+IST_OFFSET = timedelta(hours=5, minutes=30)
 
 def _flatten_article(article: Article) -> dict[str, Any]:
     """Helper to flatten Article and AIAnalysis for response."""
@@ -59,12 +64,18 @@ async def get_news(
     if date:
         try:
             target_date = datetime.strptime(date, "%Y-%m-%d").date()
-            # SQLite-safe range filter (tz-naive, strip tzinfo from stored datetimes)
-            start_of_day = datetime(target_date.year, target_date.month, target_date.day, 0, 0, 0)
-            end_of_day = datetime(target_date.year, target_date.month, target_date.day, 23, 59, 59, 999999)
+            # Articles are stored as naive UTC. The user selects a date in IST
+            # (UTC+05:30), so we shift the range back by the IST offset to get
+            # the correct UTC window stored in the database.
+            # e.g. IST 2026-07-14 00:00 → UTC 2026-07-13 18:30
+            #      IST 2026-07-14 23:59 → UTC 2026-07-14 18:29
+            start_ist = datetime(target_date.year, target_date.month, target_date.day, 0, 0, 0)
+            end_ist   = datetime(target_date.year, target_date.month, target_date.day, 23, 59, 59, 999999)
+            start_utc = start_ist - IST_OFFSET
+            end_utc   = end_ist   - IST_OFFSET
             query = query.filter(
-                Article.published_at >= start_of_day,
-                Article.published_at <= end_of_day
+                Article.published_at >= start_utc,
+                Article.published_at <= end_utc
             )
         except ValueError:
             pass  # Invalid date string — ignore filter
@@ -147,3 +158,13 @@ async def health_check(db: Session = Depends(get_db)):
     last_article = db.query(Article).order_by(Article.fetched_at.desc()).first()
     last_run = last_article.fetched_at.replace(tzinfo=timezone.utc) if last_article and last_article.fetched_at else None
     return {"status": "ok", "last_run": last_run}
+
+import asyncio
+from fastapi import BackgroundTasks
+from backend.pipeline.run import main as run_pipeline
+
+@router.post("/news/refresh")
+async def refresh_news(background_tasks: BackgroundTasks):
+    """Trigger the news pipeline to fetch, analyze, and store new articles in the background."""
+    background_tasks.add_task(run_pipeline)
+    return {"status": "success", "message": "Pipeline started in background"}

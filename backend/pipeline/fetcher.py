@@ -9,6 +9,7 @@ Implementation will be completed in Phase 1.
 
 from __future__ import annotations
 
+import calendar
 import logging
 import time
 from datetime import datetime, timezone
@@ -85,10 +86,12 @@ def parse_date(entry: dict) -> datetime | None:
     """
     # feedparser attempts to parse dates automatically and stores it in 'published_parsed'
     if hasattr(entry, 'published_parsed') and entry.published_parsed:
-        import time as time_module
         try:
-            # feedparser's parsed time is usually in UTC struct_time format if the timezone was parsed correctly
-            dt = datetime.fromtimestamp(time_module.mktime(entry.published_parsed), tz=timezone.utc)
+            # feedparser.published_parsed is always UTC struct_time.
+            # Use calendar.timegm() (NOT time.mktime()) to avoid local-timezone
+            # corruption — mktime() would add IST +05:30 offset, shifting dates
+            # by 5.5 hours and causing today's articles to appear as yesterday's.
+            dt = datetime.fromtimestamp(calendar.timegm(entry.published_parsed), tz=timezone.utc)
             return dt
         except Exception:
             pass
