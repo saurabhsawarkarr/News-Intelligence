@@ -35,24 +35,12 @@ Rules:
 - Always return valid JSON only. No extra text.
 """
 
-def generate_daily_summary(db: Session, target_date: date_type) -> None:
-    """Generate or update the daily summary for a specific date."""
-    
-    # Query all articles for the given date that have been analyzed
-    articles = db.query(Article, AIAnalysis).join(AIAnalysis).filter(
-        func.date(Article.published_at) == target_date
-    ).all()
-    
+def _generate_summary_payload(db: Session, target_date: date_type, articles: list, sector_val: str | None) -> None:
     if not articles:
-        logger.info(f"No analyzed articles found for {target_date}. Skipping daily summary.")
         return
         
-    logger.info(f"Generating daily summary for {target_date} based on {len(articles)} articles.")
-    
-    # Prepare input payload for the LLM
     input_data = []
-    # Limit to top 5 articles to avoid token limits
-    for idx, (article, analysis) in enumerate(articles[:5], 1):
+    for idx, (article, analysis) in enumerate(articles, 1):
         input_data.append(
             f"Article {idx}:\n"
             f"Headline: {article.canonical_title}\n"
@@ -84,7 +72,10 @@ def generate_daily_summary(db: Session, target_date: date_type) -> None:
         summary_data = json.loads(content)
         
         # Ensure it exists or update it
-        existing_summary = db.query(DailySummary).filter(DailySummary.date_val == target_date).first()
+        existing_summary = db.query(DailySummary).filter(
+            DailySummary.date_val == target_date,
+            DailySummary.sector_val == sector_val if sector_val else DailySummary.sector_val.is_(None)
+        ).first()
         
         if existing_summary:
             existing_summary.sentiment = summary_data.get("sentiment", "Neutral")
@@ -95,6 +86,7 @@ def generate_daily_summary(db: Session, target_date: date_type) -> None:
         else:
             new_summary = DailySummary(
                 date_val=target_date,
+                sector_val=sector_val,
                 sentiment=summary_data.get("sentiment", "Neutral"),
                 summary=summary_data.get("summary", ""),
                 events=summary_data.get("events", ""),
@@ -104,8 +96,42 @@ def generate_daily_summary(db: Session, target_date: date_type) -> None:
             db.add(new_summary)
             
         db.commit()
-        logger.info(f"Successfully generated and saved daily summary for {target_date}.")
+        logger.info(f"Successfully generated and saved daily summary for {target_date} (Sector: {sector_val}).")
         
     except Exception as e:
         db.rollback()
-        logger.error(f"Failed to generate daily summary for {target_date}: {e}")
+        logger.error(f"Failed to generate daily summary for {target_date} (Sector: {sector_val}): {e}")
+
+def generate_daily_summary(db: Session, target_date: date_type) -> None:
+    """Generate or update the daily summary for a specific date and its sectors."""
+    
+    # Query all articles for the given date that have been analyzed
+    articles = db.query(Article, AIAnalysis).join(AIAnalysis).filter(
+        func.date(Article.published_at) == target_date
+    ).all()
+    
+    if not articles:
+        logger.info(f"No analyzed articles found for {target_date}. Skipping daily summary.")
+        return
+        
+    logger.info(f"Generating daily summary for {target_date} based on {len(articles)} articles.")
+    
+    # 1. Generate Overall Summary (Top 5 articles)
+    _generate_summary_payload(db, target_date, articles[:5], None)
+    
+    # 2. Extract distinct sectors
+    sectors = set()
+    for _, analysis in articles:
+        if analysis.primary_sector:
+            sectors.add(analysis.primary_sector.strip())
+        if analysis.secondary_sector:
+            sectors.add(analysis.secondary_sector.strip())
+            
+    # 3. Generate Sector Summaries (Top 5 per sector)
+    for sector in sectors:
+        sector_articles = [
+            item for item in articles 
+            if (item[1].primary_sector == sector or item[1].secondary_sector == sector)
+        ]
+        if sector_articles:
+            _generate_summary_payload(db, target_date, sector_articles[:5], sector)

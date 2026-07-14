@@ -69,6 +69,7 @@ class ArticleSchema(BaseModel):
 class DailySummarySchema(BaseModel):
     id: UUID
     date_val: date_type
+    sector_val: str | None = None
     sentiment: str
     summary: str
     events: str | None

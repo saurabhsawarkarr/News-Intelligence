@@ -5,7 +5,7 @@ import SectorTag from './SectorTag';
 import { Loader2, Calendar } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 
-const DailySummaryCard = ({ date, lastRefreshed }) => {
+const DailySummaryCard = ({ date, sector, lastRefreshed }) => {
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -16,7 +16,7 @@ const DailySummaryCard = ({ date, lastRefreshed }) => {
       setLoading(true);
       setError(null);
       try {
-        const data = await fetchDailySummary(date);
+        const data = await fetchDailySummary(date, sector);
         if (isMounted) {
           setSummary(data);
         }
@@ -35,7 +35,7 @@ const DailySummaryCard = ({ date, lastRefreshed }) => {
     return () => {
       isMounted = false;
     };
-  }, [date, lastRefreshed]); // Reload when date changes or manual refresh
+  }, [date, sector, lastRefreshed]); // Reload when date, sector changes or manual refresh
 
   if (loading) {
     return (

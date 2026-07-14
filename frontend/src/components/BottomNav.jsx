@@ -1,7 +1,11 @@
 import React from 'react';
 import { Dot, LineChart, Wallet, Bell } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
 
 const BottomNav = () => {
+  const location = useLocation();
+  const currentPath = location.pathname;
+
   return (
     <div style={{
       position: 'fixed',
@@ -18,13 +22,25 @@ const BottomNav = () => {
       maxWidth: '1200px',
       margin: '0 auto'
     }}>
-      {/* Active Tab: News */}
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: 'var(--accent-primary)', cursor: 'pointer' }}>
-        <div style={{ position: 'relative', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Dot size={24} strokeWidth={4} />
+      {/* Tab: News */}
+      <Link to="/" style={{ textDecoration: 'none' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: currentPath === '/' ? 'var(--accent-primary)' : 'var(--text-muted)', cursor: 'pointer' }}>
+          <div style={{ position: 'relative', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Dot size={24} strokeWidth={4} />
+          </div>
+          <span style={{ fontSize: '11px', fontWeight: '600', marginTop: '4px' }}>News</span>
         </div>
-        <span style={{ fontSize: '11px', fontWeight: '600', marginTop: '4px' }}>News</span>
-      </div>
+      </Link>
+      
+      {/* Tab: Summaries */}
+      <Link to="/summaries" style={{ textDecoration: 'none' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', color: currentPath === '/summaries' ? 'var(--accent-primary)' : 'var(--text-muted)', cursor: 'pointer' }}>
+          <div style={{ position: 'relative', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <LineChart size={20} strokeWidth={2} />
+          </div>
+          <span style={{ fontSize: '11px', fontWeight: '600', marginTop: '4px' }}>Summaries</span>
+        </div>
+      </Link>
     </div>
   );
 };

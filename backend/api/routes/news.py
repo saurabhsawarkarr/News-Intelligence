@@ -131,6 +131,7 @@ async def get_sectors(db: Session = Depends(get_db)):
 @router.get("/daily-summary", response_model=DailySummarySchema)
 async def get_daily_summary(
     date: str | None = Query(None, description="YYYY-MM-DD"),
+    sector: str | None = Query(None, description="Sector Name"),
     db: Session = Depends(get_db)
 ):
     """Return the daily summary for a specific date, or the latest available if no date is provided."""
@@ -142,6 +143,11 @@ async def get_daily_summary(
             query = query.filter(DailySummary.date_val == target_date)
         except ValueError:
             pass
+            
+    if sector:
+        query = query.filter(DailySummary.sector_val == sector)
+    else:
+        query = query.filter(DailySummary.sector_val.is_(None))
             
     summary = query.order_by(DailySummary.date_val.desc()).first()
     

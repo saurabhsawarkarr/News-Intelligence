@@ -4,7 +4,7 @@ import FilterBar from '../components/FilterBar';
 import NewsCard from '../components/NewsCard';
 import ArticleDetail from '../components/ArticleDetail';
 import BottomNav from '../components/BottomNav';
-import DailySummaryCard from '../components/DailySummaryCard';
+
 import { useNews } from '../hooks/useNews';
 import { Inbox, Loader2 } from 'lucide-react';
 
@@ -43,8 +43,7 @@ const Dashboard = () => {
           </div>
         )}
 
-        {/* Display Daily Summary Card */}
-        <DailySummaryCard date={filters.date} lastRefreshed={lastRefreshed} />
+
 
         {loading && articles.length === 0 ? (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '80px 0', color: 'var(--text-muted)' }}>

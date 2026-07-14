@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import uuid
 
-from sqlalchemy import Boolean, Column, DateTime, Date, ForeignKey, String, Text, Uuid
+from sqlalchemy import Boolean, Column, DateTime, Date, ForeignKey, String, Text, Uuid, UniqueConstraint
 from sqlalchemy.sql import func
 from sqlalchemy.orm import DeclarativeBase, relationship
 
@@ -66,9 +66,11 @@ class AIAnalysis(Base):
 
 class DailySummary(Base):
     __tablename__ = "daily_summaries"
+    __table_args__ = (UniqueConstraint('date_val', 'sector_val', name='uix_daily_summary_date_sector'),)
 
     id         = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    date_val   = Column(Date, unique=True, nullable=False)
+    date_val   = Column(Date, nullable=False)
+    sector_val = Column(String(100), nullable=True)
     sentiment  = Column(String(10), nullable=False)
     summary    = Column(Text, nullable=False)
     events     = Column(Text)
