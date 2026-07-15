@@ -26,3 +26,27 @@ export const fetchDailySummary = async (date, sector) => {
 
   return await response.json();
 };
+
+export const fetchDailySummariesList = async (dateRange, sector) => {
+  let url = `${API_BASE_URL}/daily-summaries`;
+  const params = new URLSearchParams();
+  
+  if (dateRange) {
+    params.append('date', dateRange);
+  }
+  if (sector) {
+    params.append('sector', sector);
+  }
+  
+  const queryString = params.toString();
+  if (queryString) {
+    url += `?${queryString}`;
+  }
+
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error('Failed to fetch daily summaries');
+  }
+
+  return await response.json();
+};

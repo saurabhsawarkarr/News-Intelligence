@@ -61,7 +61,31 @@ const Dashboard = () => {
               <div style={{ padding: '64px 0', textAlign: 'center', color: 'var(--text-muted)' }}>
                 <Inbox size={48} style={{ margin: '0 auto 16px auto', opacity: 0.3 }} />
                 <h3 style={{ fontSize: '18px', color: 'var(--text-primary)' }}>No stories found</h3>
-                <p style={{ fontSize: '14px' }}>Try adjusting your filters.</p>
+                <p style={{ fontSize: '14px', marginBottom: '16px' }}>
+                  {filters.date === 'today' 
+                    ? "No articles fetched for today yet. The pipeline may not have run yet today."
+                    : "Try adjusting your filters."}
+                </p>
+                {filters.date === 'today' && (
+                  <button
+                    onClick={() => updateFilter('date', 'yesterday')}
+                    style={{
+                      padding: '10px 24px',
+                      borderRadius: '100px',
+                      background: 'linear-gradient(135deg, rgba(0,255,136,0.15), rgba(0,204,106,0.1))',
+                      border: '1px solid rgba(0,255,136,0.3)',
+                      color: 'var(--color-primary)',
+                      fontWeight: '700',
+                      fontSize: '14px',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 0 16px rgba(0,255,136,0.2)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.boxShadow = 'none'; }}
+                  >
+                    View Yesterday's News →
+                  </button>
+                )}
               </div>
             ) : (
               <div className="news-grid">

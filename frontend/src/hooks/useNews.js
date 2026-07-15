@@ -5,9 +5,8 @@ import { newsApi } from '../api/newsApi';
 // frontend checks every 5 min so it picks up new data shortly after the pipeline runs)
 const AUTO_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 
-// Default date is null so we show all recent news on load (not just today's,
-// which may be empty if the pipeline hasn't run yet today)
-export const useNews = (initialFilters = { sentiment: 'All', date: null, sector: null, page: 1 }) => {
+// Default date is 'today' as requested
+export const useNews = (initialFilters = { sentiment: 'All', date: 'today', sector: null, page: 1 }) => {
   const [data, setData] = useState({ data: [], total: 0, page: 1, limit: 20 });
   const [sectors, setSectors] = useState([]);
   const [health, setHealth] = useState({ status: 'unknown', last_run: null });

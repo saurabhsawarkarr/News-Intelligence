@@ -62,23 +62,40 @@ async def get_news(
     
     # Filter by date only when explicitly provided
     if date:
-        try:
-            target_date = datetime.strptime(date, "%Y-%m-%d").date()
-            # Articles are stored as naive UTC. The user selects a date in IST
-            # (UTC+05:30), so we shift the range back by the IST offset to get
-            # the correct UTC window stored in the database.
-            # e.g. IST 2026-07-14 00:00 → UTC 2026-07-13 18:30
-            #      IST 2026-07-14 23:59 → UTC 2026-07-14 18:29
+        now_ist = datetime.now(timezone.utc) + IST_OFFSET
+        if date == "today":
+            target_date = now_ist.date()
             start_ist = datetime(target_date.year, target_date.month, target_date.day, 0, 0, 0)
             end_ist   = datetime(target_date.year, target_date.month, target_date.day, 23, 59, 59, 999999)
             start_utc = start_ist - IST_OFFSET
             end_utc   = end_ist   - IST_OFFSET
-            query = query.filter(
-                Article.published_at >= start_utc,
-                Article.published_at <= end_utc
-            )
-        except ValueError:
-            pass  # Invalid date string — ignore filter
+            query = query.filter(Article.published_at >= start_utc, Article.published_at <= end_utc)
+        elif date == "yesterday":
+            target_date = now_ist.date() - timedelta(days=1)
+            start_ist = datetime(target_date.year, target_date.month, target_date.day, 0, 0, 0)
+            end_ist   = datetime(target_date.year, target_date.month, target_date.day, 23, 59, 59, 999999)
+            start_utc = start_ist - IST_OFFSET
+            end_utc   = end_ist   - IST_OFFSET
+            query = query.filter(Article.published_at >= start_utc, Article.published_at <= end_utc)
+        elif date == "7days":
+            start_utc = datetime.now(timezone.utc) - timedelta(days=7)
+            query = query.filter(Article.published_at >= start_utc)
+        elif date == "1month":
+            start_utc = datetime.now(timezone.utc) - timedelta(days=30)
+            query = query.filter(Article.published_at >= start_utc)
+        else:
+            try:
+                target_date = datetime.strptime(date, "%Y-%m-%d").date()
+                start_ist = datetime(target_date.year, target_date.month, target_date.day, 0, 0, 0)
+                end_ist   = datetime(target_date.year, target_date.month, target_date.day, 23, 59, 59, 999999)
+                start_utc = start_ist - IST_OFFSET
+                end_utc   = end_ist   - IST_OFFSET
+                query = query.filter(
+                    Article.published_at >= start_utc,
+                    Article.published_at <= end_utc
+                )
+            except ValueError:
+                pass  # Invalid date string — ignore filter
 
     # Filter by sentiment
     if sentiment.lower() != "all":
@@ -114,16 +131,27 @@ async def get_news(
 @router.get("/news/sectors", response_model=list[str])
 async def get_sectors(db: Session = Depends(get_db)):
     """Return a list of all unique sector values present in the database."""
+    # Known garbage/meta values the AI analyzer sometimes outputs instead of real sectors
+    SECTOR_BLACKLIST = {
+        "", "all", "all sectors", "neutral", "positive", "negative",
+        "null", "none", "n/a", "na", "market", "market/equities",
+        "equities", "multicap", "midcaps, smallcaps", "midcap stocks",
+    }
+    
     primary = db.query(AIAnalysis.primary_sector).filter(AIAnalysis.primary_sector.isnot(None)).distinct()
     secondary = db.query(AIAnalysis.secondary_sector).filter(AIAnalysis.secondary_sector.isnot(None)).distinct()
     
     sectors = set()
     for row in primary:
         if row[0]:
-            sectors.add(row[0].strip())
+            val = row[0].strip()
+            if val.lower() not in SECTOR_BLACKLIST:
+                sectors.add(val)
     for row in secondary:
         if row[0]:
-            sectors.add(row[0].strip())
+            val = row[0].strip()
+            if val.lower() not in SECTOR_BLACKLIST:
+                sectors.add(val)
             
     return sorted(list(sectors))
 
@@ -138,11 +166,17 @@ async def get_daily_summary(
     query = db.query(DailySummary)
     
     if date:
-        try:
-            target_date = datetime.strptime(date, "%Y-%m-%d").date()
-            query = query.filter(DailySummary.date_val == target_date)
-        except ValueError:
-            pass
+        now_ist = datetime.now(timezone.utc) + IST_OFFSET
+        if date == "today":
+            query = query.filter(DailySummary.date_val == now_ist.date())
+        elif date == "yesterday":
+            query = query.filter(DailySummary.date_val == (now_ist.date() - timedelta(days=1)))
+        else:
+            try:
+                target_date = datetime.strptime(date, "%Y-%m-%d").date()
+                query = query.filter(DailySummary.date_val == target_date)
+            except ValueError:
+                pass
             
     if sector:
         query = query.filter(DailySummary.sector_val == sector)
@@ -156,6 +190,33 @@ async def get_daily_summary(
         raise HTTPException(status_code=404, detail="Daily summary not found")
         
     return summary
+
+
+@router.get("/daily-summaries", response_model=list[DailySummarySchema])
+async def get_daily_summaries_list(
+    date: str | None = Query(None, description="7days or 1month"),
+    sector: str | None = Query(None, description="Sector Name"),
+    db: Session = Depends(get_db)
+):
+    """Return a list of daily summaries for a date range."""
+    query = db.query(DailySummary)
+    
+    now_ist = datetime.now(timezone.utc) + IST_OFFSET
+    if date == "7days":
+        query = query.filter(DailySummary.date_val >= (now_ist.date() - timedelta(days=7)))
+    elif date == "1month":
+        query = query.filter(DailySummary.date_val >= (now_ist.date() - timedelta(days=30)))
+    else:
+        # Default to just the last 7 days if something else is passed to this list endpoint
+        query = query.filter(DailySummary.date_val >= (now_ist.date() - timedelta(days=7)))
+            
+    if sector:
+        query = query.filter(DailySummary.sector_val == sector)
+    else:
+        query = query.filter(DailySummary.sector_val.is_(None))
+            
+    summaries = query.order_by(DailySummary.date_val.desc()).all()
+    return summaries
 
 
 @router.get("/health", response_model=HealthResponse)
