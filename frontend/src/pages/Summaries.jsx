@@ -13,9 +13,10 @@ const DATE_OPTIONS = [
 ];
 
 const Summaries = () => {
-  const { sectors, health, lastRefreshed, refresh, loading } = useNews();
-  const [selectedSector, setSelectedSector] = useState('');
-  const [date, setDate] = useState('today');
+  const { sectors, health, lastRefreshed, refresh, loading, filters, updateFilter } = useNews();
+  
+  const selectedSector = filters.sector || '';
+  const date = filters.date || 'today';
   const [showCustomDate, setShowCustomDate] = useState(false);
   const dateInputRef = useRef(null);
   const pillsRef = useRef(null);
@@ -37,13 +38,13 @@ const Summaries = () => {
         try { dateInputRef.current.showPicker(); } catch (e) { /* ignore */ }
       }
     } else {
-      setDate(val);
+      updateFilter('date', val);
       setShowCustomDate(false);
     }
   };
 
   const handleCustomDateChange = (e) => {
-    setDate(e.target.value);
+    updateFilter('date', e.target.value);
     setShowCustomDate(true);
   };
 
@@ -196,7 +197,7 @@ const Summaries = () => {
             <div style={{ position: 'relative', width: '100%', maxWidth: '300px' }}>
               <select
                 value={selectedSector}
-                onChange={(e) => setSelectedSector(e.target.value)}
+                onChange={(e) => updateFilter('sector', e.target.value)}
                 style={{
                   width: '100%',
                   padding: '12px 16px',

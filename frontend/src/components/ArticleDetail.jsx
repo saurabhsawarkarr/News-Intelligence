@@ -73,7 +73,7 @@ const ArticleDetail = ({ article, onBack }) => {
 
       <div style={{ padding: '24px 20px' }}>
 
-        {/* Sentiment badge + time */}
+        {/* Sentiment badge ONLY */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '10px' }}>
 
           {/* Correct Sentiment Badge — no fake % */}
@@ -92,11 +92,6 @@ const ArticleDetail = ({ article, onBack }) => {
               {sentimentLabel}
             </span>
           </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-muted)', fontSize: '13px', fontWeight: '500' }}>
-            <Clock size={13} />
-            {timeAgo}{formattedDate ? ` · ${formattedDate}` : ''}
-          </div>
         </div>
 
         {/* Title */}
@@ -104,7 +99,7 @@ const ArticleDetail = ({ article, onBack }) => {
           {title}
         </h2>
 
-        {/* Sector tags + ALL source links */}
+        {/* Sector tags + Time + ALL source links */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '28px', flexWrap: 'wrap' }}>
           {tags.map((tag, i) => (
             <div key={i} style={{
@@ -118,6 +113,21 @@ const ArticleDetail = ({ article, onBack }) => {
               {tag}
             </div>
           ))}
+          
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '6px', 
+            border: '1px solid rgba(255,255,255,0.1)',
+            padding: '5px 14px',
+            borderRadius: '20px',
+            fontSize: '12px',
+            fontWeight: '600',
+            color: 'var(--text-secondary)',
+          }}>
+            <Clock size={13} />
+            {timeAgo}{formattedDate ? ` · ${formattedDate}` : ''}
+          </div>
 
           {/* All sources, not just first */}
           {sources && sources.map((src, i) => (

@@ -115,7 +115,7 @@ const NewsCard = ({ article, onClick }) => {
 
       {/* Bottom row: sectors + time + sources */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: '8px' }}>
-        {/* Sector tags */}
+        {/* Sector tags and Time */}
         <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', flex: 1 }}>
           {tags.map((tag, i) => (
             <span key={i} style={{
@@ -130,12 +130,21 @@ const NewsCard = ({ article, onClick }) => {
               {tag}
             </span>
           ))}
+          {/* Time */}
+          <span style={{
+            backgroundColor: '#1a1a22',
+            padding: '3px 9px',
+            borderRadius: '6px',
+            fontSize: '10px',
+            fontWeight: '700',
+            color: '#8ba1bd',
+            letterSpacing: '0.05em',
+            textTransform: 'uppercase',
+            flexShrink: 0
+          }}>
+            {timeAgo}
+          </span>
         </div>
-
-        {/* Time */}
-        <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '500', flexShrink: 0 }}>
-          {timeAgo}
-        </span>
       </div>
 
       {/* Sources — ALL sources listed */}

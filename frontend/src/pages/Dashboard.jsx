@@ -47,9 +47,8 @@ const Dashboard = () => {
 
         {loading && articles.length === 0 ? (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '80px 0', color: 'var(--text-muted)' }}>
-            <Loader2 size={32} style={{ marginBottom: '16px', animation: 'spin 1s linear infinite' }} />
+            <Loader2 size={32} className="spin" style={{ marginBottom: '16px' }} />
             <span>Loading intelligence…</span>
-            <style>{`@keyframes spin { 100% { transform: rotate(360deg); } }`}</style>
           </div>
         ) : (
           <>

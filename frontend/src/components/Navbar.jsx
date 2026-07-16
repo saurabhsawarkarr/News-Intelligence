@@ -53,7 +53,7 @@ const Navbar = ({ health, lastRefreshed, onRefresh, loading }) => {
           onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--accent-primary)'; e.currentTarget.style.borderColor = 'rgba(0,255,136,0.3)'; }}
           onMouseLeave={(e) => { if (!loading) { e.currentTarget.style.color = 'var(--text-muted)'; e.currentTarget.style.borderColor = 'var(--border-color)'; }}}
         >
-          <RefreshCw size={15} style={{ animation: loading ? 'spin 1s linear infinite' : 'none' }} />
+          <RefreshCw size={15} className={loading ? 'spin' : ''} />
         </button>
 
         {/* LIVE badge */}
@@ -72,8 +72,6 @@ const Navbar = ({ health, lastRefreshed, onRefresh, loading }) => {
           </span>
         </div>
       </div>
-
-      <style>{`@keyframes spin { 100% { transform: rotate(360deg); } }`}</style>
     </nav>
   );
 };

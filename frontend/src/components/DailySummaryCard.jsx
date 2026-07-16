@@ -55,7 +55,7 @@ const DailySummaryCard = ({ date, sector, lastRefreshed }) => {
     return (
       <div style={styles.container}>
         <div style={styles.loadingContainer}>
-          <Loader2 size={24} style={styles.spinner} />
+          <Loader2 size={24} className="spin" style={styles.spinner} />
           <span style={styles.loadingText}>
             Generating AI Market Summary{sector ? ` for ${sector}` : ''}…
           </span>
@@ -159,7 +159,7 @@ const styles = {
     color: 'var(--text-muted)',
   },
   spinner: {
-    animation: 'spin 1s linear infinite',
+    /* Relying on global .spin class */
   },
   loadingText: {
     fontSize: '14px',
