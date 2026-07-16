@@ -28,16 +28,17 @@ export const fetchDailySummary = async (date, sector) => {
 };
 
 export const fetchDailySummariesList = async (dateRange, sector) => {
-  let url = `${API_BASE_URL}/daily-summaries`;
+  let url = `${API_BASE_URL}/aggregated-summary`;
   const params = new URLSearchParams();
   
   if (dateRange) {
     params.append('date', dateRange);
   }
-  if (sector) {
+  
+  if (sector && sector !== 'All') {
     params.append('sector', sector);
   }
-  
+
   const queryString = params.toString();
   if (queryString) {
     url += `?${queryString}`;
@@ -45,8 +46,11 @@ export const fetchDailySummariesList = async (dateRange, sector) => {
 
   const response = await fetch(url);
   if (!response.ok) {
-    throw new Error('Failed to fetch daily summaries');
+    throw new Error('Failed to fetch aggregated summary');
   }
 
+  // The endpoint returns a single aggregated object.
+  // We return it in an array to remain compatible with existing mapping logic if needed,
+  // or just return the object directly since DailySummaryCard already does `Array.isArray(summary) ? summary : [summary]`.
   return await response.json();
 };

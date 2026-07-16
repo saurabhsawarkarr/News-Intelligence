@@ -135,3 +135,58 @@ def generate_daily_summary(db: Session, target_date: date_type) -> None:
         ]
         if sector_articles:
             _generate_summary_payload(db, target_date, sector_articles[:5], sector)
+
+AGGREGATION_PROMPT = """\
+You are a financial analyst specialising in the Indian stock market (NSE/BSE).
+
+You will be provided with a list of daily market summaries covering a specific date range.
+Synthesize these daily summaries into a single, cohesive aggregated summary for the entire period.
+Return a JSON object with:
+- "sentiment": Overall market sentiment for the period ("Positive", "Negative", or "Neutral").
+- "summary": A 3-4 sentence high-level summary of the period's main trends and events.
+- "events": A bulleted list of the top 3-5 most important events across the period. Format as a single markdown string with bullet points (e.g., "- Event 1\\n- Event 2").
+- "sectors": A comma-separated string of the most impacted sectors across the period.
+- "reasoning": 2-3 sentences explaining the overall sentiment and sector impacts over this period.
+
+Rules:
+- Do not hallucinate events not present in the input.
+- Always return valid JSON only. No extra text.
+"""
+
+def generate_aggregated_summary(daily_summaries: list[DailySummary]) -> dict | None:
+    if not daily_summaries:
+        return None
+        
+    input_data = []
+    for idx, ds in enumerate(daily_summaries, 1):
+        input_data.append(
+            f"Date: {ds.date_val}\n"
+            f"Sentiment: {ds.sentiment}\n"
+            f"Sectors: {ds.sectors}\n"
+            f"Summary: {ds.summary}\n"
+            f"Events: {ds.events}\n"
+        )
+        
+    prompt = "Here are the daily summaries for the period:\n\n" + "\n".join(input_data)
+    
+    client = get_groq_client()
+    if not client:
+        logger.error("GROQ_API_KEY missing or invalid, skipping aggregated summary.")
+        return None
+        
+    try:
+        response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[
+                {"role": "system", "content": AGGREGATION_PROMPT},
+                {"role": "user",   "content": prompt},
+            ],
+            response_format={"type": "json_object"},
+            temperature=0.3,
+            max_tokens=800,
+        )
+        content = response.choices[0].message.content
+        return json.loads(content)
+    except Exception as e:
+        logger.error(f"Failed to generate aggregated AI summary: {e}")
+        return None

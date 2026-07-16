@@ -218,6 +218,72 @@ async def get_daily_summaries_list(
     summaries = query.order_by(DailySummary.date_val.desc()).all()
     return summaries
 
+# Simple in-memory cache for aggregated summaries (lasts 1 hour)
+import time
+from backend.pipeline.summarizer import generate_aggregated_summary
+
+_aggregated_cache = {}
+CACHE_TTL = 3600  # 1 hour
+
+@router.get("/aggregated-summary", response_model=DailySummarySchema)
+async def get_aggregated_summary(
+    date: str | None = Query(None, description="7days or 1month"),
+    sector: str | None = Query(None, description="Sector Name"),
+    db: Session = Depends(get_db)
+):
+    """Return a single, aggregated AI summary covering the specified date range."""
+    cache_key = (date, sector)
+    now = time.time()
+    
+    if cache_key in _aggregated_cache:
+        cached_time, cached_result = _aggregated_cache[cache_key]
+        if now - cached_time < CACHE_TTL:
+            return cached_result
+            
+    # Re-use the list logic to fetch the individual daily summaries
+    query = db.query(DailySummary)
+    now_ist = datetime.now(timezone.utc) + IST_OFFSET
+    
+    if date == "7days":
+        query = query.filter(DailySummary.date_val >= (now_ist.date() - timedelta(days=7)))
+    elif date == "1month":
+        query = query.filter(DailySummary.date_val >= (now_ist.date() - timedelta(days=30)))
+    else:
+        query = query.filter(DailySummary.date_val >= (now_ist.date() - timedelta(days=7)))
+            
+    if sector:
+        query = query.filter(DailySummary.sector_val == sector)
+    else:
+        query = query.filter(DailySummary.sector_val.is_(None))
+            
+    summaries = query.order_by(DailySummary.date_val.desc()).all()
+    
+    if not summaries:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=404, detail="No daily summaries found for the given range.")
+        
+    aggregated_data = generate_aggregated_summary(summaries)
+    if not aggregated_data:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=500, detail="Failed to generate aggregated summary.")
+        
+    # Build a response dict that matches DailySummarySchema
+    result = {
+        "id": summaries[0].id, # Mock ID
+        "date_val": now_ist.date(), # Use today's date to represent the report generation date
+        "sector_val": sector,
+        "sentiment": aggregated_data.get("sentiment", "Neutral"),
+        "summary": aggregated_data.get("summary", ""),
+        "events": aggregated_data.get("events", ""),
+        "sectors": aggregated_data.get("sectors", ""),
+        "reasoning": aggregated_data.get("reasoning", ""),
+        "created_at": now_ist
+    }
+    
+    _aggregated_cache[cache_key] = (now, result)
+    return result
+
+
 
 @router.get("/health", response_model=HealthResponse)
 async def health_check(db: Session = Depends(get_db)):

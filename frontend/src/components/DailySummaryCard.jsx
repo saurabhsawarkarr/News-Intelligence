@@ -92,13 +92,16 @@ const DailySummaryCard = ({ date, sector, lastRefreshed }) => {
     <>
       {summariesToRender.map((s, index) => {
         const sectorsList = s.sectors ? s.sectors.split(',').map(sec => sec.trim()) : [];
+        const isMultiDay = date === '7days' || date === '1month';
+        const cardTitle = isMultiDay ? `Market Summary (${dateLabel})` : `Market Summary ${s.date_val ? `(${s.date_val})` : ''}`;
+        
         return (
           <div key={s.id || index} style={styles.container}>
             <div style={styles.header}>
               <div style={styles.headerLeft}>
                 <Calendar size={18} style={styles.icon} />
                 <h2 style={styles.title}>
-                  Market Summary {s.date_val && `(${s.date_val})`}
+                  {cardTitle}
                 </h2>
               </div>
               <SentimentBadge sentiment={s.sentiment} />
