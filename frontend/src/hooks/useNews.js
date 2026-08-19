@@ -92,11 +92,27 @@ export const useNews = (initialFilters = { sentiment: 'All', date: 'today', sect
   const refresh = useCallback(async () => {
     try {
       setIsRefreshing(true);
-      const minSpinTime = new Promise(resolve => setTimeout(resolve, 1000));
-      await Promise.all([
-        newsApi.triggerRefresh(),
-        minSpinTime
-      ]);
+      
+      // Get current last_run to compare against
+      const prevHealth = await newsApi.getHealth();
+      const prevLastRun = prevHealth?.last_run;
+
+      // Trigger the background pipeline
+      await newsApi.triggerRefresh();
+
+      // Poll every 5 seconds until the pipeline finishes (last_run changes)
+      // Timeout after 5 minutes (60 retries * 5s)
+      let pipelineFinished = false;
+      for (let i = 0; i < 60; i++) {
+        await new Promise(resolve => setTimeout(resolve, 5000));
+        const currentHealth = await newsApi.getHealth();
+        if (currentHealth?.last_run !== prevLastRun) {
+          pipelineFinished = true;
+          break;
+        }
+      }
+
+      // Fetch the updated data
       await fetchMetadata();
       await fetchNews(filtersRef.current);
     } catch (err) {

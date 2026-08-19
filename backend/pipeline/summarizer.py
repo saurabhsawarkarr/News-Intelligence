@@ -58,7 +58,7 @@ def _generate_summary_payload(db: Session, target_date: date_type, articles: lis
         
     try:
         response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
+            model="llama-3.1-8b-instant",
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": prompt}
@@ -176,7 +176,7 @@ def generate_aggregated_summary(daily_summaries: list[DailySummary]) -> dict | N
         
     try:
         response = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
+            model="llama-3.1-8b-instant",
             messages=[
                 {"role": "system", "content": AGGREGATION_PROMPT},
                 {"role": "user",   "content": prompt},

@@ -20,8 +20,9 @@
 | **7** | GitHub Actions Scheduler | Automated hourly pipeline | 0.5–1 day |
 | **8** | Integration & Testing | End-to-end validation | 1–2 days |
 | **9** | Deployment & Polish | Hosting, secrets, final QA | 1 day |
+| **10** | Firebase Deployment | Deploy Frontend and API on Firebase | 1 day |
 
-**Total Estimated Effort: 13–21 days**
+**Total Estimated Effort: 14–22 days**
 
 ---
 
@@ -729,6 +730,39 @@ Go to: **GitHub Repo → Settings → Secrets and variables → Actions → New 
 - Live, publicly accessible dashboard
 - Hourly pipeline running automatically via GitHub Actions
 - Zero monthly cost
+
+---
+
+## Phase 10 — Firebase Deployment (Spark Free Plan)
+
+### Goals
+Deploy the frontend using Firebase Hosting while keeping the backend on Render, adhering strictly to the **Spark (Free)** plan without requiring a credit card.
+
+*Note: Firebase Cloud Functions (required to host the Python/FastAPI backend on Firebase) strictly require upgrading to the Blaze pay-as-you-go plan and entering a credit card. Therefore, to remain 100% free with no card required, we will only migrate the frontend to Firebase.*
+
+### Steps
+1. **Initialize Firebase Project**
+   - Create a project on the Firebase Console.
+   - Keep the default "Spark" (Free) plan.
+2. **Deploy Frontend (Firebase Hosting)**
+   - Initialize Firebase Hosting in the `frontend` directory: `firebase init hosting`
+   - Set build folder to `dist`
+   - Configure Firebase to rewrite all routes to `index.html` (for React Router).
+   - Run `npm run build`
+   - Deploy: `firebase deploy --only hosting`
+3. **Backend Deployment (Keep on Render)**
+   - Since the Spark plan doesn't support Python Cloud Functions, the backend will remain hosted on Render as configured in Phase 9.
+4. **Update Frontend Environment Variables**
+   - Ensure the Firebase-hosted React app points to the Render backend URL (`VITE_API_URL`).
+
+### Tasks
+- [ ] Set up Firebase Project & Firebase CLI locally.
+- [ ] Configure Firebase Hosting for the React/Vite dashboard.
+- [ ] Connect Firebase frontend to the existing Render backend URL.
+
+### Deliverable
+- React Dashboard hosted on Firebase Hosting (Spark Plan).
+- Python API remaining on Render (Free Tier).
 
 ---
 

@@ -41,7 +41,7 @@ def main() -> None:
     logger.info("After content filter: %d articles", len(filtered))
 
     # ── Phase 2B: Deduplicate ─────────────────────────────────────────────
-    from backend.db.database import get_session, get_existing_urls
+    from backend.db.database import get_session, get_existing_urls, get_unanalyzed
     
     with get_session() as db:
         existing_urls = get_existing_urls(db)
@@ -50,26 +50,49 @@ def main() -> None:
     unique = deduplicate(filtered, existing_urls=existing_urls)
     logger.info("After deduplication: %d unique articles", len(unique))
 
-    if not unique:
-        logger.info("No new articles to process. Exiting pipeline.")
+    # Fetch some previously unanalyzed articles to retry
+    with get_session() as db:
+        unanalyzed_db = get_unanalyzed(db)
+        # Limit to 30 to avoid hitting limits immediately
+        unanalyzed_db = unanalyzed_db[:30] 
+        
+        unanalyzed_dicts = []
+        for a in unanalyzed_db:
+            unanalyzed_dicts.append({
+                "id": a.id,
+                "title": a.canonical_title,
+                "description": a.canonical_title, 
+                "url": a.sources[0].url if a.sources else "",
+                "is_from_db": True
+            })
+            
+    if not unique and not unanalyzed_dicts:
+        logger.info("No new or unanalyzed articles to process. Exiting pipeline.")
         return
 
     # ── Phase 3: AI Analysis ───────────────────────────────────────────────
     from backend.pipeline.analyzer import analyze_batch
-    analyzed = analyze_batch(unique)
+    combined_batch = unique + unanalyzed_dicts
+    analyzed = analyze_batch(combined_batch)
     logger.info("AI analysis complete: %d articles enriched", len(analyzed))
 
     # ── Phase 4: Store ─────────────────────────────────────────────────────
-    from backend.db.database import save_article
+    from backend.db.database import save_article, save_analysis
     with get_session() as db:
         saved_count = 0
+        updated_count = 0
         for article in analyzed:
             try:
-                save_article(db, article)
-                saved_count += 1
+                if article.get("is_from_db"):
+                    if article.get("is_analyzed") and "sentiment" in article:
+                        save_analysis(db, article["id"], article)
+                        updated_count += 1
+                else:
+                    save_article(db, article)
+                    saved_count += 1
             except Exception as e:
                 logger.error("Error saving article '%s': %s", article.get("title"), e)
-        logger.info("Successfully stored %d new articles in the database", saved_count)
+        logger.info("Successfully stored %d new articles and updated %d existing articles", saved_count, updated_count)
 
     # ── Phase 5: Daily Summary ─────────────────────────────────────────────
     # Generate summary for the current IST calendar date.
