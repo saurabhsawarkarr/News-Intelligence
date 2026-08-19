@@ -23,7 +23,7 @@ from backend.db.models import Base
 
 # ── Engine & session factory ──────────────────────────────────────────────────
 
-connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
+connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {"prepare_threshold": 0}
 engine_kwargs = {"connect_args": connect_args}
 if not DATABASE_URL.startswith("sqlite"):
     engine_kwargs.update({"pool_pre_ping": True, "pool_size": 5, "max_overflow": 10})
