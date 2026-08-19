@@ -86,7 +86,7 @@ def analyze_article(title: str, description: str, max_retries: int = 3) -> dict 
     for attempt in range(1, max_retries + 1):
         try:
             response = client.chat.completions.create(
-                model="llama3-8b-8192",
+                model="groq/compound-mini",
                 messages=[
                     {"role": "system", "content": SYSTEM_PROMPT},
                     {"role": "user",   "content": prompt},
